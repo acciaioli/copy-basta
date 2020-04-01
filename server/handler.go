@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	cb_logging "func/copybasta/logging"
+	"github.com/spin14/copy-basta/logging"
 )
 
 type HttpHandler func(*http.Request) (int, interface{})
@@ -16,7 +16,7 @@ func JsonHandlerWrapper(handler HttpHandler) func(http.ResponseWriter, *http.Req
 	return func(w http.ResponseWriter, req *http.Request) {
 		statusCode, responseData := handler(req)
 		if err := WriteJson(w, statusCode, responseData); err != nil {
-			cb_logging.Error(req.Context(), "writeJson", err, &cb_logging.Data{"statusCode": statusCode, "responseData": responseData})
+			logging.Error(req.Context(), "writeJson", err, &logging.Data{"statusCode": statusCode, "responseData": responseData})
 		}
 	}
 }
@@ -25,7 +25,7 @@ func HealthCheckHandler(router *mux.Router) HttpHandler {
 	return func(req *http.Request) (int, interface{}) {
 		routes, err := listRoutes(router)
 		if err != nil {
-			cb_logging.Error(req.Context(), "listRoutes", err, nil)
+			logging.Error(req.Context(), "listRoutes", err, nil)
 			return http.StatusInternalServerError, nil
 		}
 		return http.StatusOK, map[string]interface{}{
@@ -39,7 +39,7 @@ func NotFoundHandler(router *mux.Router) HttpHandler {
 	return func(req *http.Request) (int, interface{}) {
 		routes, err := listRoutes(router)
 		if err != nil {
-			cb_logging.Error(req.Context(), "listRoutes", err, nil)
+			logging.Error(req.Context(), "listRoutes", err, nil)
 			return http.StatusInternalServerError, nil
 		}
 		return http.StatusNotFound, map[string]interface{}{"requestedPath": req.URL.Path, "availableRoutes": routes}

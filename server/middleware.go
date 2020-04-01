@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	cb_logging "func/copybasta/logging"
+	"github.com/spin14/copy-basta/logging"
 )
 
 func LoggerMiddleware(next http.Handler) http.Handler {
@@ -14,6 +14,6 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 		reqMethod := req.Method
 		next.ServeHTTP(w, req)
 		reqDuration := time.Since(start) / time.Millisecond
-		cb_logging.Info(req.Context(), "request", &cb_logging.Data{"url": reqURL, "method": reqMethod, "duration": int(reqDuration)})
+		logging.Info(req.Context(), "request", &logging.Data{"url": reqURL, "method": reqMethod, "duration": int(reqDuration)})
 	})
 }
