@@ -24,3 +24,10 @@ cover:
 	@ go test --count=1 --v --cover --coverprofile=cover.out `go list ./... | grep -v internal`
 	@ go tool cover --html=cover.out
 	@ echo ">> done"
+
+
+# CLI
+cli-install:
+	@ echo ">> installing cli"
+	@ go install ./cmd/copy-basta-cli
+	@ echo ">> done"
