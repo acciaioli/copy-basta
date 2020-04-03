@@ -1,0 +1,2 @@
+Hello {{ .Name }}!
+This is an example.

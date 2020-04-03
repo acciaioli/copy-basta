@@ -2,31 +2,45 @@ package generate
 
 import (
 	"errors"
-	"github.com/spf13/cobra"
 	"log"
+
+	"github.com/spf13/cobra"
 )
 
-
 type Command struct {
-	projectName string
+	templateRoot string
+	projectName  string
 }
-
 
 func New() *cobra.Command {
 	cmd := Command{}
 
 	cobraCmd := &cobra.Command{
-		Use: "generate",
+		Use:   "generate",
 		Short: "generates new project based on the template and provided parameters",
-		RunE: cmd.run,
+		RunE:  cmd.run,
 	}
 
-	cobraCmd.Flags().StringVar(&cmd.projectName,"project-name", "", `Project Name`)
+	cobraCmd.Flags().StringVar(
+		&cmd.templateRoot,
+		"template-root",
+		"",
+		`Template root directory`,
+	)
+	cobraCmd.Flags().StringVar(
+		&cmd.projectName,
+		"project-name",
+		"",
+		`Project name (root directory for the generation output)`,
+	)
 
 	return cobraCmd
 }
 
 func (cmd *Command) validate() error {
+	if cmd.templateRoot == "" {
+		return errors.New(`[ERROR] "template-root" is required`)
+	}
 	if cmd.projectName == "" {
 		return errors.New(`[ERROR] "project-name" is required`)
 	}
@@ -38,10 +52,16 @@ func (cmd *Command) run(cobraCmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := generateFromTemplate(cmd.projectName); err != nil {
+	files, err := parse(cmd.templateRoot)
+	if err != nil {
 		return err
 	}
-	
+
+	err = write(cmd.projectName, files)
+	if err != nil {
+		return err
+	}
+
 	log.Println("[INFO] Done!")
 	return nil
 }

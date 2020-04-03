@@ -3,6 +3,8 @@ module github.com/spin14/copy-basta
 go 1.13
 
 require (
+	github.com/aws/aws-lambda-go v1.16.0
+	github.com/awslabs/aws-lambda-go-api-proxy v0.6.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/kelseyhightower/envconfig v1.4.0
