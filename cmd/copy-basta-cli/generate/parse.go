@@ -1,8 +1,10 @@
 package generate
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -39,27 +41,44 @@ func parse(root string) ([]file, error) {
 	return files, nil
 }
 
-func processFile(path string, info os.FileInfo) (*file, error) {
+func processFile(filepath string, info os.FileInfo) (*file, error) {
 	if info.IsDir() {
 		return nil, nil
 	}
 
-	content, err := ioutil.ReadFile(path)
+	content, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return nil, err
 	}
 
-	if strings.HasSuffix(path, tmplExtension) {
-		return &file{path: trimExtension(path), template: true, content: content}, nil
+	if path.Ext(filepath) == tmplExtension {
+		return &file{path: trimRootDir(trimExtension(filepath)), template: true, content: content}, nil
 	}
 
-	return &file{path: path, template: false, content: content}, nil
+	return &file{path: trimRootDir(filepath), template: false, content: content}, nil
 }
 
 func trimExtension(s string) string {
-	return strings.TrimRight(s, tmplExtension)
+	return strings.TrimSuffix(s, tmplExtension)
+}
+
+func trimRootDir(s string) string {
+	ss := strings.Split(s, "/")
+	if len(ss) == 1 {
+		return ss[0]
+	}
+	return strings.Join(ss[1:], "/")
 }
 
 func validate(files []file) error {
-	panic("check all files are unique")
+	paths := map[string]struct{}{}
+
+	for _, file := range files {
+		if _, found := paths[file.path]; found {
+			return fmt.Errorf("`%s` path found multiple times", file.path)
+		}
+		paths[file.path] = struct{}{}
+	}
+
+	return nil
 }
