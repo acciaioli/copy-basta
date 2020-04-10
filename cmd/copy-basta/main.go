@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta-cli/generate"
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 
 func execute() error {
 	cmd := &cobra.Command{
-		Use:   "copy-basta-cli",
+		Use:   "copy-basta",
 		Short: "copy-basta utility",
 		Long: `Basta! Stop copying.
 

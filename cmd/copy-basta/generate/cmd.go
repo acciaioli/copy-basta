@@ -49,6 +49,7 @@ func New() *cobra.Command {
 }
 
 func (cmd *Command) run(cobraCmd *cobra.Command, args []string) error {
+	log.Println("[INFO] Generating new project!")
 	if err := cmd.validate(); err != nil {
 		return err
 	}

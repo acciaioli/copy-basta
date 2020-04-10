@@ -1,0 +1,16 @@
+package source
+
+import (
+    "fmt"
+)
+
+func GetDescription() string {
+    return fmt.Sprintf("%s%s",newMsg,`
+
+The name is {{.Name}}, and they are {{.Age}} years old. Their list of interests includes:
+{{define "interestsList"}}- {{.}}{{end}}{{range $i := .Interests}}
+    {{template "interestsList" $i}}
+{{end}}
+On their own yours: "{{.Quote}}"
+`)
+}

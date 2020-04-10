@@ -1,4 +1,4 @@
-.PHONY: default fix lint test
+.PHONY: default fix lint test install demo
 
 default: fix lint test
 
@@ -25,9 +25,12 @@ cover:
 	@ go tool cover --html=cover.out
 	@ echo ">> done"
 
-
-# CLI
-cli-install:
+install:
 	@ echo ">> installing cli"
-	@ go install ./cmd/copy-basta-cli
+	@ go install ./cmd/copy-basta
+	@ echo ">> done"
+
+demo: install
+	@ echo ">> running demo"
+	@ cd ./internal; make run > /dev/null
 	@ echo ">> done"
