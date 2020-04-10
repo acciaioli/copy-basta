@@ -29,6 +29,7 @@ $ make demo
 
 ## Todo
 
+- CI
 - spec file support (templates should be the ones defining what is required)
 - default parameters support
 - type parameter support (templates should be the ones defining what is required)
