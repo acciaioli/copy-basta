@@ -26,11 +26,3 @@ The following command generates a new go project from a template, compiles it an
 ```bash
 $ make demo
 ```
-
-## Todo
-
-- CI
-- spec file support (templates should be the ones defining what is required)
-- default parameters support
-- type parameter support (templates should be the ones defining what is required)
-- generate from remote repo
