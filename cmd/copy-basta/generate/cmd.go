@@ -1,7 +1,6 @@
 package generate
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,15 +11,16 @@ import (
 )
 
 const (
-	flagSrc  = "src"
-	flagDest = "dest"
-	flagSpec = "spec"
+	CommandFlag      = "generate"
+	CommandFlagShort = "generates new project based on the template and provided parameters"
 
-	defaultSpec = "spec.yaml"
-
-	usageSrc  = "Generated Project root directory"
-	usageDest = "Specification YAML file, relative to the template root directory"
-	usageSpec = "Path to the YAML file with the variables to use in the templates"
+	flagSrc         = "src"
+	flagDest        = "dest"
+	flagSpec        = "spec"
+	flagDefaultSpec = "spec.yaml"
+	flagUsageSrc    = "Generated Project root directory"
+	flagUsageDest   = "Specification YAML file, relative to the template root directory"
+	flagUsageSpec   = "Path to the YAML file with the variables to use in the templates"
 )
 
 type Flag struct {
@@ -37,53 +37,25 @@ type Command struct {
 	bastaTemplateVarsYAML string
 }
 
-/*
-
-	cobraCmd.Flags().StringVar(
-		&cmd.src,
-		"src",
-		"",
-		`Template root directory`,
-	)
-	cobraCmd.Flags().StringVar(
-		&cmd.dest,
-		"dest",
-		"",
-		`Project name (root directory for the generation output)`,
-	)
-	cobraCmd.Flags().StringVar(
-		&cmd.spec,
-		"spec",
-		"spec.yaml",
-		`Specification YAML file, relative to the template root directory`,
-	)
-	cobraCmd.Flags().StringVar(
-		&cmd.bastaTemplateVarsYAML,
-		"basta-yaml",
-		"",
-		`Path to the YAML file with the variables to use in the templates`,
-	)
-*/
-
 func (cmd *Command) Flags() []Flag {
 	return []Flag{
 		{
 			Ref:     &cmd.src,
 			Name:    flagSrc,
 			Default: nil,
-			Usage:   usageSrc,
+			Usage:   flagUsageSrc,
 		},
 		{
 			Ref:     &cmd.dest,
 			Name:    flagDest,
 			Default: nil,
-			Usage:   usageDest,
+			Usage:   flagUsageDest,
 		},
 		{
 			Ref:     &cmd.spec,
 			Name:    flagSpec,
-			Default: sToP(defaultSpec),
-			Usage:   usageSpec,
+			Default: sToP(flagDefaultSpec),
+			Usage:   flagUsageSpec,
 		},
 		{
 			Ref:     &cmd.bastaTemplateVarsYAML,
@@ -121,18 +93,18 @@ func (cmd *Command) Run() error {
 
 func (cmd *Command) validate() error {
 	if cmd.src == "" {
-		return errors.New(`[ERROR] "src" is required`)
+		return fmt.Errorf(`[ERROR] "%s" is required`, flagSrc)
 	}
 
 	if cmd.dest == "" {
-		return errors.New(`[ERROR] "dest" is required`)
+		return fmt.Errorf(`[ERROR] "%s" is required`, flagDest)
 	}
 
 	if cmd.spec == "" {
-		return errors.New(`[ERROR] "spec" is required`)
+		return fmt.Errorf(`[ERROR] "%s" is required`, flagSpec)
 	}
 	spec := path.Join(cmd.src, cmd.spec)
-	if err := fileExists(spec, "spec"); err != nil {
+	if err := fileExists(spec, flagSpec); err != nil {
 		return err
 	}
 
