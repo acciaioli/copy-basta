@@ -6,37 +6,56 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 
-	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	flagSrc  = "src"
+	flagDest = "dest"
+	flagSpec = "spec"
+
+	defaultSpec = "spec.yaml"
+
+	usageSrc  = "Generated Project root directory"
+	usageDest = "Specification YAML file, relative to the template root directory"
+	usageSpec = "Path to the YAML file with the variables to use in the templates"
+)
+
+type Flag struct {
+	Ref     *string
+	Name    string
+	Default *string
+	Usage   string
+}
+
 type Command struct {
-	templateRoot          string
-	projectName           string
+	src                   string
+	dest                  string
+	spec                  string
 	bastaTemplateVarsYAML string
 }
 
-func New() *cobra.Command {
-	cmd := Command{}
-
-	cobraCmd := &cobra.Command{
-		Use:   "generate",
-		Short: "generates new project based on the template and provided parameters",
-		RunE:  cmd.run,
-	}
+/*
 
 	cobraCmd.Flags().StringVar(
-		&cmd.templateRoot,
-		"template-root",
+		&cmd.src,
+		"src",
 		"",
 		`Template root directory`,
 	)
 	cobraCmd.Flags().StringVar(
-		&cmd.projectName,
-		"project-name",
+		&cmd.dest,
+		"dest",
 		"",
 		`Project name (root directory for the generation output)`,
+	)
+	cobraCmd.Flags().StringVar(
+		&cmd.spec,
+		"spec",
+		"spec.yaml",
+		`Specification YAML file, relative to the template root directory`,
 	)
 	cobraCmd.Flags().StringVar(
 		&cmd.bastaTemplateVarsYAML,
@@ -44,17 +63,44 @@ func New() *cobra.Command {
 		"",
 		`Path to the YAML file with the variables to use in the templates`,
 	)
+*/
 
-	return cobraCmd
+func (cmd *Command) Flags() []Flag {
+	return []Flag{
+		{
+			Ref:     &cmd.src,
+			Name:    flagSrc,
+			Default: nil,
+			Usage:   usageSrc,
+		},
+		{
+			Ref:     &cmd.dest,
+			Name:    flagDest,
+			Default: nil,
+			Usage:   usageDest,
+		},
+		{
+			Ref:     &cmd.spec,
+			Name:    flagSpec,
+			Default: sToP(defaultSpec),
+			Usage:   usageSpec,
+		},
+		{
+			Ref:     &cmd.bastaTemplateVarsYAML,
+			Name:    "basta-yaml",
+			Default: nil,
+			Usage:   "Path to the YAML file with the variables to use in the templates",
+		},
+	}
 }
 
-func (cmd *Command) run(cobraCmd *cobra.Command, args []string) error {
+func (cmd *Command) Run() error {
 	log.Println("[INFO] Generating new project!")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	files, err := parse(cmd.templateRoot)
+	files, err := parse(cmd.src)
 	if err != nil {
 		return err
 	}
@@ -64,7 +110,7 @@ func (cmd *Command) run(cobraCmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = write(cmd.projectName, files, templateVars)
+	err = write(cmd.dest, files, templateVars)
 	if err != nil {
 		return err
 	}
@@ -74,18 +120,28 @@ func (cmd *Command) run(cobraCmd *cobra.Command, args []string) error {
 }
 
 func (cmd *Command) validate() error {
-	if cmd.templateRoot == "" {
-		return errors.New(`[ERROR] "template-root" is required`)
+	if cmd.src == "" {
+		return errors.New(`[ERROR] "src" is required`)
 	}
-	if cmd.projectName == "" {
-		return errors.New(`[ERROR] "project-name" is required`)
+
+	if cmd.dest == "" {
+		return errors.New(`[ERROR] "dest" is required`)
 	}
-	if cmd.bastaTemplateVarsYAML == "" {
-		return errors.New(`[ERROR] "basta-yaml" is required`)
+
+	if cmd.spec == "" {
+		return errors.New(`[ERROR] "spec" is required`)
 	}
-	if _, err := os.Stat(cmd.bastaTemplateVarsYAML); os.IsNotExist(err) {
-		return fmt.Errorf(`[ERROR] "basta-yaml" (%s) not found`, cmd.bastaTemplateVarsYAML)
+	spec := path.Join(cmd.src, cmd.spec)
+	if err := fileExists(spec, "spec"); err != nil {
+		return err
 	}
+
+	if cmd.bastaTemplateVarsYAML != "" {
+		if err := fileExists(cmd.bastaTemplateVarsYAML, "basta-yaml"); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -102,4 +158,19 @@ func (cmd *Command) loadYAML(filepath string) (map[string]interface{}, error) {
 	}
 
 	return templateVars, nil
+}
+
+func fileExists(filePath string, name string) error {
+	fInfo, err := os.Stat(filePath)
+	if err != nil {
+		return fmt.Errorf(`[ERROR] "%s" (%s) not found`, name, filePath)
+	}
+	if fInfo.IsDir() {
+		return fmt.Errorf(`[ERROR] "%s" (%s) is not a file`, name, filePath)
+	}
+	return nil
+}
+
+func sToP(s string) *string {
+	return &s
 }

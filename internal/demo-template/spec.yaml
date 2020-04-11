@@ -1,0 +1,20 @@
+---
+variables:
+  goModule:
+    type: string
+    description: go module name (https://github.com/golang/go/wiki/Modules)
+    default: github.com/spin14/copy-basta-example
+  goVersion: 1.14
+    type: string
+    description: go module version (https://github.com/golang/go/wiki/Modules)
+  name:
+    type: string
+    description: your name
+  Age:
+    type: number
+    description: your age
+  Interests:
+    - progamming
+    - playing football
+    - gamming
+  Quote: "If live gives you lemons, make sure you share them"

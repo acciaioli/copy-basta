@@ -6,10 +6,12 @@ require (
 	github.com/aws/aws-lambda-go v1.16.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.6.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/go-playground/validator/v10 v10.2.0
 	github.com/gorilla/mux v1.7.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mitchellh/mapstructure v1.2.2 // indirect
 	github.com/pelletier/go-toml v1.6.0 // indirect
+	github.com/prometheus/common v0.4.0
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v0.0.7
