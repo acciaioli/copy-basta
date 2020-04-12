@@ -6,6 +6,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,21 +15,21 @@ func Test_write(t *testing.T) {
 
 	defer func() { _ = os.RemoveAll(root) }()
 
-	files := []file{
+	files := []common.File{
 		{
-			path:     "simple.md",
-			template: false,
-			content:  []byte("# useless readme\n"),
+			Path:     "simple.md",
+			Template: false,
+			Content:  []byte("# useless readme\n"),
 		},
 		{
-			path:     "nested/file.txt",
-			template: false,
-			content:  []byte("this file is nested\n"),
+			Path:     "nested/file.txt",
+			Template: false,
+			Content:  []byte("this file is nested\n"),
 		},
 		{
-			path:     "template.go",
-			template: true,
-			content:  []byte("package generated\n\nconst Version = \"{{ .Version }}\"\n"),
+			Path:     "template.go",
+			Template: true,
+			Content:  []byte("package generated\n\nconst Version = \"{{ .Version }}\"\n"),
 		},
 	}
 
@@ -37,15 +38,15 @@ func Test_write(t *testing.T) {
 	err := write(root, files, tVars)
 	require.Nil(t, err)
 
-	simpleMD, err := ioutil.ReadFile(path.Join(root, files[0].path))
+	simpleMD, err := ioutil.ReadFile(path.Join(root, files[0].Path))
 	require.Nil(t, err)
-	require.Equal(t, simpleMD, files[0].content)
+	require.Equal(t, simpleMD, files[0].Content)
 
-	nested, err := ioutil.ReadFile(path.Join(root, files[1].path))
+	nested, err := ioutil.ReadFile(path.Join(root, files[1].Path))
 	require.Nil(t, err)
-	require.Equal(t, nested, files[1].content)
+	require.Equal(t, nested, files[1].Content)
 
-	templateGO, err := ioutil.ReadFile(path.Join(root, files[2].path))
+	templateGO, err := ioutil.ReadFile(path.Join(root, files[2].Path))
 	require.Nil(t, err)
 	require.Equal(t, templateGO, []byte("package generated\n\nconst Version = \"v0.1.4\"\n"))
 }

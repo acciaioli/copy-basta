@@ -1,0 +1,22 @@
+---
+variables:
+  - name: goModule
+    type: string
+    description: go module name (https://github.com/golang/go/wiki/Modules)
+    default: github.com/spin14/copy-basta-example
+  - name: goVersion
+    type: string
+    description: go module version (https://github.com/golang/go/wiki/Modules)
+  - name: name
+    type: string
+    description: your name
+  - name: age
+    type: number
+    description: your age
+  - name: interests
+    type: array
+    description: a list of activities you find interesting
+  - name: quote
+    type: string
+    description: a quote of your authorship
+    default: I can't thing of any quote

@@ -1,10 +1,10 @@
 ---
-goModule: github.com/spin14/copy-basta-example
-goVersion: 1.14
-Name: Joao Valverde
-Age: 29
-Interests:
-  - progamming
-  - playing football
-  - gamming
-Quote: "If live gives you lemons, make sure you share them"
+goModule: "github.com/spin14/copy-basta-example"
+goVersion: "1.14"
+name: "Joao Valverde"
+age: 29
+interests:
+  - "progamming"
+  - "playing football"
+  - "gamming"
+quote: "If live gives you lemons, make sure you share them"
