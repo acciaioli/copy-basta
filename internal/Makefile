@@ -2,7 +2,7 @@
 
 src = ./demo-template
 dest = ./generated
-bastaYAML = ./basta.yaml
+input = ./basta.yaml
 demoBin = demo
 
 default: clean
@@ -14,7 +14,7 @@ clean:
 
 generate: clean
 	@ echo ">> generating new project from template"
-	@ copy-basta generate --src=$(src) --dest=$(dest) --basta-yaml=$(bastaYAML)
+	@ copy-basta generate --src=$(src) --dest=$(dest) --input=$(bastaYAML)
 	@ echo ">> done"
 
 build: generate

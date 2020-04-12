@@ -4,7 +4,7 @@ variables:
     type: string
     description: go module name (https://github.com/golang/go/wiki/Modules)
     default: github.com/spin14/copy-basta-example
-  goVersion: 1.14
+  goVersion:
     type: string
     description: go module version (https://github.com/golang/go/wiki/Modules)
   name:
@@ -14,7 +14,9 @@ variables:
     type: number
     description: your age
   Interests:
-    - progamming
-    - playing football
-    - gamming
-  Quote: "If live gives you lemons, make sure you share them"
+    type: array
+    description: a list of activities you find interesting
+  Quote:
+    type: string
+    description: a quote of your authorship
+    default: I can't thing of any quote

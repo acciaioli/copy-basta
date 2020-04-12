@@ -1,4 +1,4 @@
-package spec
+package specification
 
 import (
 	"errors"
@@ -24,7 +24,7 @@ variables:
     type: number
 `),
 			expectedSpec: Spec{
-				Variables: map[string]Variable{
+				Variables: map[string]SpecVariable{
 					"stringHi": {
 						Type: "string",
 					},
@@ -47,16 +47,16 @@ variables:
     default: 75
     description: an integer`),
 			expectedSpec: Spec{
-				Variables: map[string]Variable{
+				Variables: map[string]SpecVariable{
 					"stringHello": {
 						Type:        "string",
 						Default:     "hello",
-						Description: "used to greet",
+						Description: func() *string { s := "used to greet"; return &s }(),
 					},
 					"int75": {
 						Type:        "number",
 						Default:     75,
-						Description: "an integer",
+						Description: func() *string { s := "an integer"; return &s }(),
 					},
 				},
 			},

@@ -4,17 +4,19 @@ import (
 	"os"
 	"path"
 	"text/template"
+
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
 )
 
-func write(root string, files []file, templateVars map[string]interface{}) error {
+func write(root string, files []common.File, templateVars map[string]interface{}) error {
 	for _, file := range files {
-		fp, err := createFile(path.Join(root, file.path))
+		fp, err := createFile(path.Join(root, file.Path))
 		if err != nil {
 			return err
 		}
 
-		if file.template {
-			t, err := newTemplate(file.path, string(file.content))
+		if file.Template {
+			t, err := newTemplate(file.Path, string(file.Content))
 			if err != nil {
 				return err
 			}
@@ -25,7 +27,7 @@ func write(root string, files []file, templateVars map[string]interface{}) error
 			}
 
 		} else {
-			_, err := fp.Write(file.content)
+			_, err := fp.Write(file.Content)
 			if err != nil {
 				return err
 			}

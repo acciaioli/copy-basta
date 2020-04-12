@@ -7,6 +7,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/specification"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -17,10 +19,12 @@ const (
 	flagSrc         = "src"
 	flagDest        = "dest"
 	flagSpec        = "spec"
+	flagInput       = "input"
 	flagDefaultSpec = "spec.yaml"
 	flagUsageSrc    = "Generated Project root directory"
 	flagUsageDest   = "Specification YAML file, relative to the template root directory"
-	flagUsageSpec   = "Path to the YAML file with the variables to use in the templates"
+	flagUsageSpec   = "Path to the YAML containing the template specification"
+	flagUsageInput  = "Path to the YAML file with the variables to use in the templates"
 )
 
 type Flag struct {
@@ -31,10 +35,10 @@ type Flag struct {
 }
 
 type Command struct {
-	src                   string
-	dest                  string
-	spec                  string
-	bastaTemplateVarsYAML string
+	src       string
+	dest      string
+	specYAML  string
+	inputYAML string
 }
 
 func (cmd *Command) Flags() []Flag {
@@ -52,16 +56,16 @@ func (cmd *Command) Flags() []Flag {
 			Usage:   flagUsageDest,
 		},
 		{
-			Ref:     &cmd.spec,
+			Ref:     &cmd.specYAML,
 			Name:    flagSpec,
 			Default: sToP(flagDefaultSpec),
 			Usage:   flagUsageSpec,
 		},
 		{
-			Ref:     &cmd.bastaTemplateVarsYAML,
-			Name:    "basta-yaml",
+			Ref:     &cmd.inputYAML,
+			Name:    flagInput,
 			Default: nil,
-			Usage:   "Path to the YAML file with the variables to use in the templates",
+			Usage:   flagUsageInput,
 		},
 	}
 }
@@ -77,7 +81,14 @@ func (cmd *Command) Run() error {
 		return err
 	}
 
-	templateVars, err := cmd.loadYAML(cmd.bastaTemplateVarsYAML)
+	spec, err := specification.New(cmd.specFullPath())
+	if err != nil {
+		return err
+	}
+	input, err := spec.PromptInput()
+	_ = input
+
+	templateVars, err := cmd.loadYAML(cmd.inputYAML)
 	if err != nil {
 		return err
 	}
@@ -91,6 +102,10 @@ func (cmd *Command) Run() error {
 	return nil
 }
 
+func (cmd *Command) specFullPath() string {
+	return path.Join(cmd.src, cmd.specYAML)
+}
+
 func (cmd *Command) validate() error {
 	if cmd.src == "" {
 		return fmt.Errorf(`[ERROR] "%s" is required`, flagSrc)
@@ -100,16 +115,16 @@ func (cmd *Command) validate() error {
 		return fmt.Errorf(`[ERROR] "%s" is required`, flagDest)
 	}
 
-	if cmd.spec == "" {
+	if cmd.specYAML == "" {
 		return fmt.Errorf(`[ERROR] "%s" is required`, flagSpec)
 	}
-	spec := path.Join(cmd.src, cmd.spec)
+	spec := cmd.specFullPath()
 	if err := fileExists(spec, flagSpec); err != nil {
 		return err
 	}
 
-	if cmd.bastaTemplateVarsYAML != "" {
-		if err := fileExists(cmd.bastaTemplateVarsYAML, "basta-yaml"); err != nil {
+	if cmd.inputYAML != "" {
+		if err := fileExists(cmd.inputYAML, flagInput); err != nil {
 			return err
 		}
 	}

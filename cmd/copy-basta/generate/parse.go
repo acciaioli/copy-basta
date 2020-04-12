@@ -7,14 +7,16 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
 )
 
 const (
 	tmplExtension = ".basta"
 )
 
-func parse(root string) ([]file, error) {
-	var files []file
+func parse(root string) ([]common.File, error) {
+	var files []common.File
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -41,7 +43,7 @@ func parse(root string) ([]file, error) {
 	return files, nil
 }
 
-func processFile(filepath string, info os.FileInfo) (*file, error) {
+func processFile(filepath string, info os.FileInfo) (*common.File, error) {
 	if info.IsDir() {
 		return nil, nil
 	}
@@ -52,10 +54,10 @@ func processFile(filepath string, info os.FileInfo) (*file, error) {
 	}
 
 	if path.Ext(filepath) == tmplExtension {
-		return &file{path: trimRootDir(trimExtension(filepath)), template: true, content: content}, nil
+		return &common.File{Path: trimRootDir(trimExtension(filepath)), Template: true, Content: content}, nil
 	}
 
-	return &file{path: trimRootDir(filepath), template: false, content: content}, nil
+	return &common.File{Path: trimRootDir(filepath), Template: false, Content: content}, nil
 }
 
 func trimExtension(s string) string {
@@ -70,14 +72,14 @@ func trimRootDir(s string) string {
 	return strings.Join(ss[1:], "/")
 }
 
-func validate(files []file) error {
+func validate(files []common.File) error {
 	paths := map[string]struct{}{}
 
 	for _, file := range files {
-		if _, found := paths[file.path]; found {
-			return fmt.Errorf("`%s` path found multiple times", file.path)
+		if _, found := paths[file.Path]; found {
+			return fmt.Errorf("`%s` path found multiple times", file.Path)
 		}
-		paths[file.path] = struct{}{}
+		paths[file.Path] = struct{}{}
 	}
 
 	return nil

@@ -4,6 +4,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,16 +36,16 @@ func Test_processFile(t *testing.T) {
 		2 directories, 2 files
 	*/
 
-	expectedFile := []file{
+	expectedFile := []common.File{
 		{
-			path:     "example.txt",
-			template: true,
-			content:  []byte("Hello {{.Name}}!\nThis is an example.\n"),
+			Path:     "example.txt",
+			Template: true,
+			Content:  []byte("Hello {{.Name}}!\nThis is an example.\n"),
 		},
 		{
-			path:     "nested/dummy.md",
-			template: false,
-			content:  []byte("# dummy\n\nThis file is useless.\n"),
+			Path:     "nested/dummy.md",
+			Template: false,
+			Content:  []byte("# dummy\n\nThis file is useless.\n"),
 		},
 	}
 
@@ -56,20 +58,20 @@ func Test_processFile(t *testing.T) {
 }
 
 func Test_validate_ok(t *testing.T) {
-	files := []file{
-		{path: "a.go"},
-		{path: "a.md"},
-		{path: "b.txt"},
+	files := []common.File{
+		{Path: "a.go"},
+		{Path: "a.md"},
+		{Path: "b.txt"},
 	}
 	err := validate(files)
 	require.Nil(t, err)
 }
 
 func Test_validate_err(t *testing.T) {
-	files := []file{
-		{path: "a.go"},
-		{path: "a.md"},
-		{path: "a.go"},
+	files := []common.File{
+		{Path: "a.go"},
+		{Path: "a.md"},
+		{Path: "a.go"},
 	}
 	err := validate(files)
 	require.NotNil(t, err)
