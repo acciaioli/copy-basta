@@ -12,6 +12,11 @@ clean:
 	@ rm -rf $(dest)
 	@ echo ">> done"
 
+dynamic-generate: clean
+	@ echo ">> dynamically generating new project from template"
+	@ copy-basta generate --src=$(src) --dest=$(dest)
+	@ echo ">> done"
+
 generate: clean
 	@ echo ">> generating new project from template"
 	@ copy-basta generate --src=$(src) --dest=$(dest) --input=$(input)

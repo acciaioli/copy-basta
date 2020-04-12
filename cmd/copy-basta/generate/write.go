@@ -8,7 +8,7 @@ import (
 	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
 )
 
-func write(root string, files []common.File, templateVars map[string]interface{}) error {
+func write(root string, files []common.File, input common.InputVariables) error {
 	for _, file := range files {
 		fp, err := createFile(path.Join(root, file.Path))
 		if err != nil {
@@ -21,7 +21,7 @@ func write(root string, files []common.File, templateVars map[string]interface{}
 				return err
 			}
 
-			err = t.Execute(fp, templateVars)
+			err = t.Execute(fp, input)
 			if err != nil {
 				return err
 			}
