@@ -52,6 +52,27 @@ func (spec *Spec) PromptInput() (common.InputVariables, error) {
 	inputVars := common.InputVariables{}
 
 	for k, v := range spec.Variables {
+		userInput, err := promptLoop(r, k, v)
+		if err != nil {
+			return nil, err
+		}
+
+		if userInput != nil {
+			value, err := v.process(*userInput)
+			if err != nil {
+				return nil, err
+			}
+			inputVars[k] = value
+		} else {
+			inputVars[k] = v.Default
+		}
+	}
+
+	return inputVars, nil
+}
+
+func promptLoop(r *bufio.Reader, k string, v SpecVariable) (*string, error) {
+	for {
 		fmt.Print(v.prompt(k))
 		userInput, err := r.ReadString('\n')
 		if err != nil {
@@ -60,9 +81,11 @@ func (spec *Spec) PromptInput() (common.InputVariables, error) {
 		userInput = strings.TrimSuffix(userInput, "\n")
 
 		if userInput != "" {
-			inputVars[k] = 10
+			return &userInput, nil
+		}
+
+		if v.Default != nil {
+			return nil, nil
 		}
 	}
-
-	return inputVars, nil
 }
