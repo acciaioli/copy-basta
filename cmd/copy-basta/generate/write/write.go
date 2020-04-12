@@ -1,6 +1,7 @@
-package generate
+package write
 
 import (
+	"log"
 	"os"
 	"path"
 	"text/template"
@@ -8,9 +9,17 @@ import (
 	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
 )
 
-func write(root string, files []common.File, input common.InputVariables) error {
+func Write(destDir string, files []common.File, input common.InputVariables) error {
+	err := write(destDir, files, input)
+	if err != nil {
+		cleanup(destDir)
+	}
+	return err
+}
+
+func write(destDir string, files []common.File, input common.InputVariables) error {
 	for _, file := range files {
-		fp, err := createFile(path.Join(root, file.Path))
+		fp, err := createFile(path.Join(destDir, file.Path))
 		if err != nil {
 			return err
 		}
@@ -32,9 +41,14 @@ func write(root string, files []common.File, input common.InputVariables) error 
 				return err
 			}
 		}
-
 	}
 	return nil
+}
+
+func cleanup(destDir string) {
+	if err := os.RemoveAll(destDir); err != nil {
+		log.Print("[ERROR] cleanup fail")
+	}
 }
 
 func newTemplate(name string, t string) (*template.Template, error) {
