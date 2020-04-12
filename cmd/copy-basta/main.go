@@ -15,7 +15,6 @@ func main() {
 	}
 }
 
-
 func execute() error {
 	cmd := &cobra.Command{
 		Use:   "copy-basta",
