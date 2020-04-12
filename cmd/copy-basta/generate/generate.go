@@ -2,14 +2,13 @@ package generate
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/specification"
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
 
-	"gopkg.in/yaml.v2"
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/specification"
 )
 
 const (
@@ -85,15 +84,23 @@ func (cmd *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	input, err := spec.PromptInput()
-	_ = input
 
-	templateVars, err := cmd.loadYAML(cmd.inputYAML)
-	if err != nil {
-		return err
+	var input common.InputVariables
+	if cmd.inputYAML != "" {
+		fileInput, err := spec.InputFromFile(cmd.inputYAML)
+		if err != nil {
+			return err
+		}
+		input = fileInput
+	} else {
+		stdinInput, err := spec.InputFromStdIn()
+		if err != nil {
+			return err
+		}
+		input = stdinInput
 	}
 
-	err = write(cmd.dest, files, templateVars)
+	err = write(cmd.dest, files, input)
 	if err != nil {
 		return err
 	}
@@ -130,21 +137,6 @@ func (cmd *Command) validate() error {
 	}
 
 	return nil
-}
-
-func (cmd *Command) loadYAML(filepath string) (map[string]interface{}, error) {
-	yamlFile, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-
-	var templateVars = map[string]interface{}{}
-	err = yaml.Unmarshal(yamlFile, &templateVars)
-	if err != nil {
-		return nil, err
-	}
-
-	return templateVars, nil
 }
 
 func fileExists(filePath string, name string) error {

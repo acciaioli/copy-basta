@@ -14,7 +14,7 @@ clean:
 
 generate: clean
 	@ echo ">> generating new project from template"
-	@ copy-basta generate --src=$(src) --dest=$(dest) --input=$(bastaYAML)
+	@ copy-basta generate --src=$(src) --dest=$(dest) --input=$(input)
 	@ echo ">> done"
 
 build: generate

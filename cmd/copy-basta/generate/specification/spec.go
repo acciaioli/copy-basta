@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -46,7 +47,7 @@ func newFromReader(r io.Reader) (*Spec, error) {
 	return &spec, nil
 }
 
-func (spec *Spec) PromptInput() (common.InputVariables, error) {
+func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
 	r := bufio.NewReader(os.Stdin)
 
 	inputVars := common.InputVariables{}
@@ -69,6 +70,36 @@ func (spec *Spec) PromptInput() (common.InputVariables, error) {
 	}
 
 	return inputVars, nil
+}
+
+func (spec *Spec) InputFromFile(inputYAML string) (common.InputVariables, error) {
+	yamlFile, err := ioutil.ReadFile(inputYAML)
+	if err != nil {
+		return nil, err
+	}
+
+	input := common.InputVariables{}
+	err = yaml.Unmarshal(yamlFile, &input)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range spec.Variables {
+		value, ok := input[v.Name]
+		if !ok {
+			if v.Default != nil {
+				return nil, fmt.Errorf("no value nor default for %s", v.Name)
+			}
+			input[v.Name] = v.Default
+		} else {
+			if err := v.valueOk(value); err != nil {
+				return nil, err
+			}
+		}
+
+	}
+
+	return input, nil
 }
 
 func promptLoop(r *bufio.Reader, v SpecVariable) (*string, error) {
