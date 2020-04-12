@@ -6,6 +6,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/write"
+
 	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/generate/specification"
@@ -100,7 +102,7 @@ func (cmd *Command) Run() error {
 		input = stdinInput
 	}
 
-	err = write(cmd.dest, files, input)
+	err = write.Write(cmd.dest, files, input)
 	if err != nil {
 		return err
 	}
@@ -121,17 +123,20 @@ func (cmd *Command) validate() error {
 	if cmd.dest == "" {
 		return fmt.Errorf(`[ERROR] "%s" is required`, flagDest)
 	}
+	if _, err := os.Stat(cmd.dest); err == nil {
+		return fmt.Errorf(`[ERROR] "%s" (%s) already exists`, flagDest, cmd.dest)
+	}
 
 	if cmd.specYAML == "" {
 		return fmt.Errorf(`[ERROR] "%s" is required`, flagSpec)
 	}
 	spec := cmd.specFullPath()
-	if err := fileExists(spec, flagSpec); err != nil {
+	if err := fileExistsOrErr(spec, flagSpec); err != nil {
 		return err
 	}
 
 	if cmd.inputYAML != "" {
-		if err := fileExists(cmd.inputYAML, flagInput); err != nil {
+		if err := fileExistsOrErr(cmd.inputYAML, flagInput); err != nil {
 			return err
 		}
 	}
@@ -139,7 +144,7 @@ func (cmd *Command) validate() error {
 	return nil
 }
 
-func fileExists(filePath string, name string) error {
+func fileExistsOrErr(filePath string, name string) error {
 	fInfo, err := os.Stat(filePath)
 	if err != nil {
 		return fmt.Errorf(`[ERROR] "%s" (%s) not found`, name, filePath)

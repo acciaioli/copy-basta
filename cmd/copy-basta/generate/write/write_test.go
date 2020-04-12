@@ -1,4 +1,4 @@
-package generate
+package write
 
 import (
 	"io/ioutil"
