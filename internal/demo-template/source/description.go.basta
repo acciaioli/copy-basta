@@ -7,10 +7,10 @@ import (
 func GetDescription() string {
     return fmt.Sprintf("%s%s",newMsg,`
 
-The name is {{.Name}}, and they are {{.Age}} years old. Their list of interests includes:
-{{define "interestsList"}}- {{.}}{{end}}{{range $i := .Interests}}
+The name is {{.name}}, and they are {{.age}} years old. Their list of interests includes:
+{{define "interestsList"}}- {{.}}{{end}}{{range $i := .interests}}
     {{template "interestsList" $i}}
 {{end}}
-On their own yours: "{{.Quote}}"
+On their own yours: "{{.quote}}"
 `)
 }

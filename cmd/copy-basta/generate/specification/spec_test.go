@@ -18,17 +18,19 @@ func Test_newFromReader(t *testing.T) {
 			name: "simple",
 			r: strings.NewReader(`---
 variables:
-  stringHi:
+  - name: stringHi
     type: string
-  float21_6:
+  - name: float21_6
     type: number
 `),
 			expectedSpec: Spec{
-				Variables: map[string]SpecVariable{
-					"stringHi": {
+				Variables: []SpecVariable{
+					{
+						Name: "stringHi",
 						Type: "string",
 					},
-					"float21_6": {
+					{
+						Name: "float21_6",
 						Type: "number",
 					},
 				},
@@ -38,22 +40,24 @@ variables:
 			name: "complete",
 			r: strings.NewReader(`---
 variables:
-  stringHello:
+  - name: stringHello
     type: string
     description: used to greet
     default: hello
-  int75:
+  - name: int75
     type: number
     default: 75
     description: an integer`),
 			expectedSpec: Spec{
-				Variables: map[string]SpecVariable{
-					"stringHello": {
+				Variables: []SpecVariable{
+					{
+						Name:        "stringHello",
 						Type:        "string",
 						Default:     "hello",
 						Description: func() *string { s := "used to greet"; return &s }(),
 					},
-					"int75": {
+					{
+						Name:        "int75",
 						Type:        "number",
 						Default:     75,
 						Description: func() *string { s := "an integer"; return &s }(),

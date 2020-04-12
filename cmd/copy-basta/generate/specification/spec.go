@@ -7,13 +7,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
-
 	"gopkg.in/yaml.v2"
+
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
 )
 
 type Spec struct {
-	Variables map[string]SpecVariable `yaml:variables`
+	Variables []SpecVariable `yaml:variables`
 }
 
 func (spec *Spec) validate() error {
@@ -51,8 +51,8 @@ func (spec *Spec) PromptInput() (common.InputVariables, error) {
 
 	inputVars := common.InputVariables{}
 
-	for k, v := range spec.Variables {
-		userInput, err := promptLoop(r, k, v)
+	for _, v := range spec.Variables {
+		userInput, err := promptLoop(r, v)
 		if err != nil {
 			return nil, err
 		}
@@ -62,18 +62,18 @@ func (spec *Spec) PromptInput() (common.InputVariables, error) {
 			if err != nil {
 				return nil, err
 			}
-			inputVars[k] = value
+			inputVars[v.Name] = value
 		} else {
-			inputVars[k] = v.Default
+			inputVars[v.Name] = v.Default
 		}
 	}
 
 	return inputVars, nil
 }
 
-func promptLoop(r *bufio.Reader, k string, v SpecVariable) (*string, error) {
+func promptLoop(r *bufio.Reader, v SpecVariable) (*string, error) {
 	for {
-		fmt.Print(v.prompt(k))
+		fmt.Print(v.prompt())
 		userInput, err := r.ReadString('\n')
 		if err != nil {
 			return nil, err
