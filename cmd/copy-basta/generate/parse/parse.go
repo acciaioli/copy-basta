@@ -1,8 +1,9 @@
-package generate
+package parse
 
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -12,18 +13,44 @@ import (
 )
 
 const (
+	ignoreFile    = ".bastaignore"
 	tmplExtension = ".basta"
 )
 
-func parse(root string) ([]common.File, error) {
+func Parse(root string) ([]common.File, error) {
 	var files []common.File
 
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	ignoreFilePath := path.Join(root, ignoreFile)
+
+	var ignorer *Ignorer
+	if fInfo, err := os.Stat(ignoreFilePath); err == nil {
+		if fInfo.IsDir() {
+			return nil, fmt.Errorf("%s must no be a dir", ignoreFilePath)
+		}
+		file, err := os.Open(ignoreFilePath)
+		if err != nil {
+			return nil, err
+		}
+		log.Print("loading bastaignore\n")
+		ignorer, err = NewIgnorer(root, file)
+	} else {
+		ignorer, err = NewIgnorer(root, nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err := filepath.Walk(root, func(fPath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
+		log.Print(fPath)
+		log.Printf("%s vs %v", fPath, ignorer.patterns)
+		if ignorer.ignore(fPath) {
+			return nil
+		}
 
-		file, err := processFile(path, info)
+		file, err := processFile(fPath, info)
 		if err != nil {
 			return err
 		}

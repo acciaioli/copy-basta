@@ -6,6 +6,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/generate/parse"
+
 	"github.com/spin14/copy-basta/cmd/copy-basta/generate/write"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
@@ -77,7 +79,7 @@ func (cmd *Command) Run() error {
 		return err
 	}
 
-	files, err := parse(cmd.src)
+	files, err := parse.Parse(cmd.src)
 	if err != nil {
 		return err
 	}
