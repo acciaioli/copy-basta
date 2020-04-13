@@ -1,4 +1,4 @@
-package generate
+package parse
 
 import (
 	"os"
@@ -49,7 +49,7 @@ func Test_processFile(t *testing.T) {
 		},
 	}
 
-	files, err := parse(root)
+	files, err := Parse(root)
 	require.Nil(t, err)
 
 	require.Equal(t, len(expectedFile), len(files))

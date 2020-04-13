@@ -11,7 +11,7 @@ import (
 )
 
 func Test_write(t *testing.T) {
-	root := "./test-files/generated"
+	root := "./test-generated"
 
 	defer func() { _ = os.RemoveAll(root) }()
 
