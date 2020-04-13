@@ -6,7 +6,7 @@ import (
 	"path"
 	"testing"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 	"github.com/stretchr/testify/require"
 )
 

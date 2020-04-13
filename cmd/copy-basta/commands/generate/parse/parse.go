@@ -9,18 +9,18 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
 const (
-	ignoreFile    = ".bastaignore"
+	IgnoreFile    = ".bastaignore"
 	tmplExtension = ".basta"
 )
 
 func Parse(root string) ([]common.File, error) {
 	var files []common.File
 
-	ignoreFilePath := path.Join(root, ignoreFile)
+	ignoreFilePath := path.Join(root, IgnoreFile)
 
 	var ignorer *Ignorer
 	if fInfo, err := os.Stat(ignoreFilePath); err == nil {

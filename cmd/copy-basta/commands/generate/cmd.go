@@ -6,18 +6,15 @@ import (
 	"os"
 	"path"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/parse"
-
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/write"
-
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
-
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/specification"
+	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/parse"
+	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/specification"
+	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/write"
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
 const (
-	CommandFlag      = "generate"
-	CommandFlagShort = "generates new project based on the template and provided parameters"
+	commandID          = "generate"
+	commandDescription = "generates new project based on the template and provided parameters"
 
 	flagSrc         = "src"
 	flagDest        = "dest"
@@ -30,13 +27,6 @@ const (
 	flagUsageInput  = "Path to the YAML file with the variables to use in the templates"
 )
 
-type Flag struct {
-	Ref     *string
-	Name    string
-	Default *string
-	Usage   string
-}
-
 type Command struct {
 	src       string
 	dest      string
@@ -44,8 +34,20 @@ type Command struct {
 	inputYAML string
 }
 
-func (cmd *Command) Flags() []Flag {
-	return []Flag{
+func NewCommand() *Command {
+	return &Command{}
+}
+
+func (cmd *Command) Name() string {
+	return commandID
+}
+
+func (cmd *Command) Description() string {
+	return commandDescription
+}
+
+func (cmd *Command) Flags() []common.CommandFlag {
+	return []common.CommandFlag{
 		{
 			Ref:     &cmd.src,
 			Name:    flagSrc,

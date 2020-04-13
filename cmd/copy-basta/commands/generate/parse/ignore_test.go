@@ -12,7 +12,9 @@ const testLines = `
 
 myignoredfile.go
 
-my-ignored-dir/*
+my-ignored-tree/
+
+my-ignored-files/*
 
 starts*
 *ends
@@ -20,15 +22,19 @@ starts*
 `
 
 func Test_NewIgnorer(t *testing.T) {
+	expectedDirs := []string{
+		"root/my-ignored-tree",
+	}
 	expectedPatterns := []string{
 		"root/myignoredfile.go",
-		"root/my-ignored-dir/*",
+		"root/my-ignored-files/*",
 		"root/starts*",
 		"root/*ends",
 		"root/*mids*",
 	}
 	ignorer, err := NewIgnorer("root", strings.NewReader(testLines))
 	require.Nil(t, err)
+	require.Equal(t, expectedDirs, ignorer.dirs)
 	require.Equal(t, expectedPatterns, ignorer.patterns)
 }
 
@@ -42,52 +48,62 @@ func Test_Ignorer_ignore(t *testing.T) {
 		matched  bool
 	}{
 		{
-			name:     "file matched",
+			name:     "file - ignored",
 			filepath: "root/myignoredfile.go",
 			matched:  true,
 		},
 		{
-			name:     "file not matched",
+			name:     "file - not ignored",
 			filepath: "root/myfile.go",
 			matched:  false,
 		},
 		{
-			name:     "file matched in dir",
-			filepath: "root/my-ignored-dir/file.go",
+			name:     "tree - ignored",
+			filepath: "root/my-ignored-tree/file.go",
 			matched:  true,
 		},
 		{
-			name:     "file not matched in dir nested dir",
-			filepath: "root/my-ignored-dir/nested/file.go",
+			name:     "tree nested - ignored",
+			filepath: "root/my-ignored-tree/nested/file.go",
+			matched:  true,
+		},
+		{
+			name:     "dir files - ignored",
+			filepath: "root/my-ignored-files/file.go",
+			matched:  true,
+		},
+		{
+			name:     "dir files nested - not ignored",
+			filepath: "root/my-ignored-files/nested/file.go",
 			matched:  false,
 		},
 		{
-			name:     "file matched starts with",
+			name:     "starts with - ignored",
 			filepath: "root/starts-file.go",
 			matched:  true,
 		},
 		{
-			name:     "file not matched starts with in dir",
+			name:     "starts with in dir - not ignored",
 			filepath: "root/some-dir/starts-file.go",
 			matched:  false,
 		},
 		{
-			name:     "file matched ends with",
+			name:     "ends with - ignored",
 			filepath: "root/file.go-ends",
 			matched:  true,
 		},
 		{
-			name:     "file not matched ends with in dir",
+			name:     "ends with in dir - not ignored",
 			filepath: "root/some-dir/file-ends.go",
 			matched:  false,
 		},
 		{
-			name:     "file matched mids with",
+			name:     "mids with - ignored",
 			filepath: "root/file-mids.go",
 			matched:  true,
 		},
 		{
-			name:     "file not matched mids with in dir",
+			name:     "mids with in dir - not ignored",
 			filepath: "root/some-dir/file-mids-any.go",
 			matched:  false,
 		},
