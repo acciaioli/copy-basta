@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 
 	"github.com/stretchr/testify/require"
 )
@@ -39,11 +39,13 @@ func Test_processFile(t *testing.T) {
 	expectedFile := []common.File{
 		{
 			Path:     "example.txt",
+			Mode:     0666 - 002, // default permission - umask
 			Template: true,
 			Content:  []byte("Hello {{.Name}}!\nThis is an example.\n"),
 		},
 		{
 			Path:     "nested/dummy.md",
+			Mode:     0666 - 002, // default permission - umask
 			Template: false,
 			Content:  []byte("# dummy\n\nThis file is useless.\n"),
 		},

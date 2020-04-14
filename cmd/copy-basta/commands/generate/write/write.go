@@ -4,12 +4,14 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"text/template"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate/common"
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
 func Write(destDir string, files []common.File, input common.InputVariables) error {
+	log.Println("WRITE destDir: ", destDir)
 	err := write(destDir, files, input)
 	if err != nil {
 		cleanup(destDir)
@@ -19,8 +21,11 @@ func Write(destDir string, files []common.File, input common.InputVariables) err
 
 func write(destDir string, files []common.File, input common.InputVariables) error {
 	for _, file := range files {
-		fp, err := createFile(path.Join(destDir, file.Path))
+		log.Println(file.Path, file.Mode, string(file.Content))
+
+		fp, err := createFile(filepath.Join(destDir, file.Path), file.Mode)
 		if err != nil {
+			log.Fatal(err.Error())
 			return err
 		}
 
@@ -55,10 +60,18 @@ func newTemplate(name string, t string) (*template.Template, error) {
 	return template.New(name).Option("missingkey=error").Parse(t)
 }
 
-func createFile(filepath string) (*os.File, error) {
+func createFile(filepath string, mode os.FileMode) (*os.File, error) {
 	err := os.MkdirAll(path.Dir(filepath), os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
-	return os.Create(filepath)
+	f, err := os.Create(filepath)
+	if err != nil {
+		return nil, err
+	}
+	err = f.Chmod(mode)
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
 }

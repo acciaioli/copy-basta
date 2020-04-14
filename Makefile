@@ -10,7 +10,7 @@ fix:
 
 lint:
 	@ echo ">> running linter"
-	@ golangci-lint run
+	@ golangci-lint run --skip-dirs internal
 	@ echo ">> done"
 
 
@@ -30,7 +30,21 @@ install:
 	@ go install ./cmd/copy-basta
 	@ echo ">> done"
 
-demo: install
-	@ echo ">> running demo"
+demo-generate: install
+	@ echo ">> running demo generate command"
 	@ cd ./internal; make run > /dev/null
+	@ echo ">> done"
+
+
+tmpl = ./.tmp/
+gen = ./generated
+exec = $(gen)/main.sh
+
+demo-init: install
+	@ echo ">> running demo init command"
+	@ rm -rf $(tmpl)
+	@ copy-basta init --name=$(tmpl)
+	@ rm -rf $(gen)
+	@ copy-basta generate --src=$(tmpl) --dest=$(gen)
+	@ sh $(exec)
 	@ echo ">> done"

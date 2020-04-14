@@ -5,7 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/generate"
+	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate"
+	"github.com/spin14/copy-basta/cmd/copy-basta/commands/initialize"
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
 func main() {
@@ -24,7 +26,42 @@ func execute() error {
 This CLI can be used to bootstrap go projects in seconds, and stop the copy paste madness`,
 	}
 
-	cmd.AddCommand(generate.New())
+	cmd.AddCommand(newCobraCommand(generate.NewCommand()))
+	cmd.AddCommand(newCobraCommand(initialize.NewCommand()))
 
 	return cmd.Execute()
+}
+
+type CommandInterface interface {
+	Name() string
+	Description() string
+	Flags() []common.CommandFlag
+	Run() error
+}
+
+func newCobraCommand(cmd CommandInterface) *cobra.Command {
+	cobraCmd := &cobra.Command{
+		Use:   cmd.Name(),
+		Short: cmd.Description(),
+		RunE: func(*cobra.Command, []string) error {
+			return cmd.Run()
+		},
+	}
+
+	for _, flag := range cmd.Flags() {
+		cobraCmd.Flags().StringVar(
+			flag.Ref,
+			flag.Name,
+			getDefault(flag.Default),
+			flag.Usage,
+		)
+	}
+	return cobraCmd
+}
+
+func getDefault(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
 }

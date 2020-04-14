@@ -18,7 +18,9 @@ dist/
 
 # Dependency directories (remove the comment below to include it)
 vendor/
-generated/
 
-playground/
+
+# for tmp shenanigans
+.tmp/
+generated/
 play.go
