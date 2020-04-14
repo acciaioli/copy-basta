@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/parse"
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/specification"
@@ -20,7 +20,7 @@ const (
 	flagDest        = "dest"
 	flagSpec        = "spec"
 	flagInput       = "input"
-	flagDefaultSpec = "spec.yaml"
+	flagDefaultSpec = common.SpecFile
 	flagUsageSrc    = "Generated Project root directory"
 	flagUsageDest   = "Specification YAML file, relative to the template root directory"
 	flagUsageSpec   = "Path to the YAML containing the template specification"
@@ -116,7 +116,7 @@ func (cmd *Command) Run() error {
 }
 
 func (cmd *Command) specFullPath() string {
-	return path.Join(cmd.src, cmd.specYAML)
+	return filepath.Join(cmd.src, cmd.specYAML)
 }
 
 func (cmd *Command) validate() error {

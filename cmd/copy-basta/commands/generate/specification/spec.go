@@ -14,7 +14,7 @@ import (
 )
 
 type Spec struct {
-	Variables []SpecVariable `yaml:variables`
+	Variables []SpecVariable `yaml:"variables"`
 }
 
 func (spec *Spec) validate() error {

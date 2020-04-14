@@ -4,7 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -33,11 +32,11 @@ func NewIgnorer(root string, r io.Reader) (*Ignorer, error) {
 
 		if strings.HasSuffix(line, "/") {
 			// completely excluded dir
-			dir := path.Join(root, line)
+			dir := filepath.Join(root, line)
 			i.dirs = append(i.dirs, dir)
 		} else {
 			// patterns
-			pattern := path.Join(root, line)
+			pattern := filepath.Join(root, line)
 			if _, err := filepath.Match(pattern, ""); err != nil {
 				return nil, err
 			}

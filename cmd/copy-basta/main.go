@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -54,7 +53,7 @@ func newCobraCommand(cmd CommandInterface) *cobra.Command {
 			flag.Ref,
 			flag.Name,
 			getDefault(flag.Default),
-			getUsage(flag.Usage, flag.Default),
+			flag.Usage,
 		)
 	}
 	return cobraCmd
@@ -65,11 +64,4 @@ func getDefault(p *string) string {
 		return ""
 	}
 	return *p
-}
-
-func getUsage(description string, defaultP *string) string {
-	if defaultP != nil {
-		return fmt.Sprintf("%s (default is %s)", description, *defaultP)
-	}
-	return description
 }

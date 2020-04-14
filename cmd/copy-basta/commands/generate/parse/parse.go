@@ -3,7 +3,6 @@ package parse
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -12,40 +11,18 @@ import (
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
-const (
-	IgnoreFile    = ".bastaignore"
-	tmplExtension = ".basta"
-)
-
 func Parse(root string) ([]common.File, error) {
 	var files []common.File
 
-	ignoreFilePath := path.Join(root, IgnoreFile)
-
-	var ignorer *Ignorer
-	if fInfo, err := os.Stat(ignoreFilePath); err == nil {
-		if fInfo.IsDir() {
-			return nil, fmt.Errorf("%s must no be a dir", ignoreFilePath)
-		}
-		file, err := os.Open(ignoreFilePath)
-		if err != nil {
-			return nil, err
-		}
-		log.Print("loading bastaignore\n")
-		ignorer, err = NewIgnorer(root, file)
-	} else {
-		ignorer, err = NewIgnorer(root, nil)
-		if err != nil {
-			return nil, err
-		}
+	ignorer, err := getIgnorer(root)
+	if err != nil {
+		return nil, err
 	}
 
-	err := filepath.Walk(root, func(fPath string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(root, func(fPath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		log.Print(fPath)
-		log.Printf("%s vs %v", fPath, ignorer.patterns)
 		if ignorer.ignore(fPath) {
 			return nil
 		}
@@ -59,15 +36,32 @@ func Parse(root string) ([]common.File, error) {
 		}
 
 		return nil
-	})
-
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 
-	err = validate(files)
+	if err := validate(files); err != nil {
+		return nil, err
+	}
 
 	return files, nil
+}
+
+func getIgnorer(root string) (*Ignorer, error) {
+	ignoreFilePath := filepath.Join(root, common.IgnoreFile)
+
+	if fInfo, err := os.Stat(ignoreFilePath); err == nil {
+		if fInfo.IsDir() {
+			return nil, fmt.Errorf("%s must no be a dir", ignoreFilePath)
+		}
+		file, err := os.Open(ignoreFilePath)
+		if err != nil {
+			return nil, err
+		}
+		return NewIgnorer(root, file)
+	}
+
+	return NewIgnorer(root, nil)
 }
 
 func processFile(filepath string, info os.FileInfo) (*common.File, error) {
@@ -80,15 +74,15 @@ func processFile(filepath string, info os.FileInfo) (*common.File, error) {
 		return nil, err
 	}
 
-	if path.Ext(filepath) == tmplExtension {
-		return &common.File{Path: trimRootDir(trimExtension(filepath)), Template: true, Content: content}, nil
+	if path.Ext(filepath) == common.TemplateExtension {
+		return &common.File{Path: trimRootDir(trimExtension(filepath)), Mode: info.Mode(), Template: true, Content: content}, nil
 	}
 
-	return &common.File{Path: trimRootDir(filepath), Template: false, Content: content}, nil
+	return &common.File{Path: trimRootDir(filepath), Mode: info.Mode(), Template: false, Content: content}, nil
 }
 
 func trimExtension(s string) string {
-	return strings.TrimSuffix(s, tmplExtension)
+	return strings.TrimSuffix(s, common.TemplateExtension)
 }
 
 func trimRootDir(s string) string {

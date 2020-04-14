@@ -1,5 +1,13 @@
 package common
 
+import "os"
+
+const (
+	IgnoreFile        = ".bastaignore"
+	SpecFile          = "spec.yaml"
+	TemplateExtension = ".basta"
+)
+
 type CommandFlag struct {
 	Ref     *string
 	Name    string
@@ -9,6 +17,7 @@ type CommandFlag struct {
 
 type File struct {
 	Path     string
+	Mode     os.FileMode
 	Template bool
 	Content  []byte
 }
