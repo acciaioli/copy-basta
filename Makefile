@@ -48,3 +48,8 @@ demo-init: install
 	@ copy-basta generate --src=$(tmpl) --dest=$(gen)
 	@ sh $(exec)
 	@ echo ">> done"
+
+demo-logs: install
+	@ echo ">> running logging demo"
+	@ cd internal/demo-log; go run main.go
+	@ echo ">> done"
