@@ -1,4 +1,4 @@
-package log
+package common
 
 import (
 	"fmt"
@@ -43,14 +43,14 @@ func Test_Logger(t *testing.T) {
 			logFunc: func(l *Logger) {
 				l.Warn(msg)
 			},
-			expected: []string{msg, "[WARN]", string(ColorOrange)},
+			expected: []string{msg, "[WARN]", "@", string(ColorOrange)},
 		},
 		{
 			level: Error,
 			logFunc: func(l *Logger) {
 				l.ErrorWithData(msg, LoggerData{"Forty-Three": 43})
 			},
-			expected: []string{msg, "[ERROR]", string(ColorRed), "Forty-Three", "43"},
+			expected: []string{msg, "[ERROR]", "@", string(ColorRed), "Forty-Three", "43"},
 		},
 	}
 

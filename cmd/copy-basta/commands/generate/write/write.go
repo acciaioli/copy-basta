@@ -1,7 +1,6 @@
 package write
 
 import (
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,7 +10,6 @@ import (
 )
 
 func Write(destDir string, files []common.File, input common.InputVariables) error {
-	log.Println("WRITE destDir: ", destDir)
 	err := write(destDir, files, input)
 	if err != nil {
 		cleanup(destDir)
@@ -21,11 +19,9 @@ func Write(destDir string, files []common.File, input common.InputVariables) err
 
 func write(destDir string, files []common.File, input common.InputVariables) error {
 	for _, file := range files {
-		log.Println(file.Path, file.Mode, string(file.Content))
 
 		fp, err := createFile(filepath.Join(destDir, file.Path), file.Mode)
 		if err != nil {
-			log.Fatal(err.Error())
 			return err
 		}
 
@@ -52,7 +48,6 @@ func write(destDir string, files []common.File, input common.InputVariables) err
 
 func cleanup(destDir string) {
 	if err := os.RemoveAll(destDir); err != nil {
-		log.Print("[ERROR] cleanup fail")
 	}
 }
 

@@ -1,11 +1,14 @@
-package log
+package common
 
 import (
 	"fmt"
 	"io"
 	"os"
 	"runtime"
+	"strings"
 )
+
+var Log Logger
 
 type Level int
 
@@ -25,6 +28,23 @@ var levelNames = map[Level]string{
 	Fatal: "[FATAL]",
 }
 
+func sToLevel(s string) (Level, error) {
+	switch strings.ToLower(s) {
+	case "debug":
+		return Debug, nil
+	case "info":
+		return Info, nil
+	case "warn":
+		return Warn, nil
+	case "error":
+		return Error, nil
+	case "fatal":
+		return Fatal, nil
+	default:
+		return Fatal, fmt.Errorf("invalid log level representation `%s`", s)
+	}
+}
+
 type Logger struct {
 	level         Level
 	writer        io.Writer
@@ -38,6 +58,17 @@ type LoggerOpt func(*Logger) error
 
 func WithLevel(level Level) LoggerOpt {
 	return func(l *Logger) error {
+		l.level = level
+		return nil
+	}
+}
+
+func WithLevelS(level string) LoggerOpt {
+	return func(l *Logger) error {
+		level, err := sToLevel(level)
+		if err != nil {
+			return err
+		}
 		l.level = level
 		return nil
 	}
@@ -68,6 +99,7 @@ func NewLogger(opts ...LoggerOpt) (*Logger, error) {
 		}
 	}
 
+	l.DebugWithData("new logger created", LoggerData{"level": l.level, "writer is stdout": l.writer == os.Stdout})
 	return &l, nil
 }
 
@@ -121,16 +153,18 @@ func (l *Logger) log(level Level, data LoggerData, userMsg string) {
 	bgColor := l.colorBG(level)
 	levelMsg := ColoredFormat(color, TextFormatBold, bgColor, levelNames[level])
 	runtimeMsg := ""
-	if _, fn, fl, ok := runtime.Caller(2); ok {
-		runtimeMsg = fmt.Sprintf("@ %s:%d", fn, fl)
+	if level > Info {
+		if _, fn, fl, ok := runtime.Caller(2); ok {
+			runtimeMsg = fmt.Sprintf("@ %s:%d", fn, fl)
+		}
 	}
 
-	if _, err := fmt.Fprintf(l.writer, "%s	%s	%s\n", levelMsg, runtimeMsg, userMsg); err != nil {
+	if _, err := fmt.Fprintf(l.writer, "%s	%s	%s\n", levelMsg, userMsg, runtimeMsg); err != nil {
 		panic(err)
 	}
 	for k, v := range data {
 		fmtK := ColoredFormat(color, TextFormatNormal, bgColor, k)
-		if _, err := fmt.Fprintf(l.writer, "          %s: %v\n", fmtK, v); err != nil {
+		if _, err := fmt.Fprintf(l.writer, "        %s: %v\n", fmtK, v); err != nil {
 			panic(err)
 		}
 	}

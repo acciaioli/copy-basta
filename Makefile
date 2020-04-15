@@ -32,7 +32,7 @@ install:
 
 demo-generate: install
 	@ echo ">> running demo generate command"
-	@ cd ./internal; make run > /dev/null
+	@ cd ./internal; make run
 	@ echo ">> done"
 
 

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate"
@@ -13,7 +11,7 @@ import (
 func main() {
 	err := execute()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 
@@ -25,9 +23,12 @@ func execute() error {
 
 This CLI can be used to bootstrap go projects in seconds, and stop the copy paste madness`,
 	}
+	var logLevel string
+	cmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", `Used to set the logging level. 
+Available options: [debug, info, warn, error, fatal]`)
 
-	cmd.AddCommand(newCobraCommand(generate.NewCommand()))
-	cmd.AddCommand(newCobraCommand(initialize.NewCommand()))
+	cmd.AddCommand(newCobraCommand(generate.NewCommand(), logLevel))
+	cmd.AddCommand(newCobraCommand(initialize.NewCommand(), logLevel))
 
 	return cmd.Execute()
 }
@@ -36,15 +37,19 @@ type CommandInterface interface {
 	Name() string
 	Description() string
 	Flags() []common.CommandFlag
-	Run() error
+	Run(*common.Logger) error
 }
 
-func newCobraCommand(cmd CommandInterface) *cobra.Command {
+func newCobraCommand(cmd CommandInterface, logLevel string) *cobra.Command {
 	cobraCmd := &cobra.Command{
 		Use:   cmd.Name(),
 		Short: cmd.Description(),
 		RunE: func(*cobra.Command, []string) error {
-			return cmd.Run()
+			logger, err := common.NewLogger(common.WithLevelS(logLevel))
+			if err != nil {
+				return err
+			}
+			return cmd.Run(logger)
 		},
 	}
 

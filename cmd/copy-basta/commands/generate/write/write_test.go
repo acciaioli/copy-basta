@@ -6,8 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 	"github.com/stretchr/testify/require"
+
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
 func Test_write(t *testing.T) {
