@@ -193,9 +193,9 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 
 func Test_SpecVariable_prompt(t *testing.T) {
 	tests := []struct {
-		name         string
-		specVar      SpecVariable
-		expectedText string
+		name       string
+		specVar    SpecVariable
+		expectedIn []string
 	}{
 		{
 			name: "simple",
@@ -205,7 +205,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 				Default:     nil,
 				Description: nil,
 			},
-			expectedText: "myVariable [myType]\n=>",
+			expectedIn: []string{"myType", "?", "myVariable"},
 		},
 		{
 			name: "with default",
@@ -215,7 +215,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 				Default:     "myDefault",
 				Description: nil,
 			},
-			expectedText: "myVariable [myType]\n[myDefault]=>",
+			expectedIn: []string{"myType", "?", "myVariable", "myDefault"},
 		},
 		{
 			name: "with description",
@@ -225,7 +225,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 				Default:     nil,
 				Description: func() *string { s := "my template variable description"; return &s }(),
 			},
-			expectedText: "myVariable [myType] (my template variable description)\n=>",
+			expectedIn: []string{"my template variable description", "myType", "?", "myVariable"},
 		},
 		{
 			name: "with default and description",
@@ -235,14 +235,17 @@ func Test_SpecVariable_prompt(t *testing.T) {
 				Default:     "myDefault",
 				Description: func() *string { s := "my template variable description"; return &s }(),
 			},
-			expectedText: "myVariable [myType] (my template variable description)\n[myDefault]=>",
+			expectedIn: []string{"my template variable description", "myType", "?", "myVariable", "myDefault"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			text := tt.specVar.prompt()
-			require.Equal(t, tt.expectedText, text)
+			for _, s := range tt.expectedIn {
+				require.Contains(t, text, s)
+			}
+
 		})
 	}
 }

@@ -2,7 +2,6 @@ package initialize
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/initialize/bootstrap"
@@ -45,18 +44,22 @@ func (cmd *Command) Flags() []common.CommandFlag {
 	}
 }
 
-func (cmd *Command) Run() error {
-	log.Println("[INFO] Generating new template project!")
+func (cmd *Command) Run(logger *common.Logger) error {
+	logger.DebugWithData("user input", common.LoggerData{
+		flagName: cmd.name,
+	})
+	logger.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
+	logger.InfoWithData("bootstrapping new template project", common.LoggerData{"filepath": cmd.name})
 	err := bootstrap.Bootstrap(cmd.name)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[INFO] Done!")
+	logger.Info("done")
 	return nil
 }
 

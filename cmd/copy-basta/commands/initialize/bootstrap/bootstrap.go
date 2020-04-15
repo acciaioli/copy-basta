@@ -2,7 +2,6 @@ package bootstrap
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -57,7 +56,6 @@ func bootstrap(destDir string) error {
 
 func cleanup(destDir string) {
 	if err := os.RemoveAll(destDir); err != nil {
-		log.Print("[ERROR] cleanup fail")
 	}
 }
 

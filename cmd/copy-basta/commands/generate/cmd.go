@@ -2,12 +2,12 @@ package generate
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/parse"
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/specification"
+
+	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/parse"
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/write"
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
@@ -75,30 +75,45 @@ func (cmd *Command) Flags() []common.CommandFlag {
 	}
 }
 
-func (cmd *Command) Run() error {
-	log.Println("[INFO] Generating new project!")
+func (cmd *Command) Run(logger *common.Logger) error {
+	logger.DebugWithData("user input", common.LoggerData{
+		flagSrc:   cmd.src,
+		flagDest:  cmd.dest,
+		flagSpec:  cmd.specYAML,
+		flagInput: cmd.inputYAML,
+	})
+	logger.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	files, err := parse.Parse(cmd.src)
-	if err != nil {
-		return err
-	}
-
+	logger.Info("loading specification file")
 	spec, err := specification.New(cmd.specFullPath())
 	if err != nil {
 		return err
 	}
 
+	logger.Info("parsing template files")
+	files, err := parse.Parse(cmd.src)
+	if err != nil {
+		return err
+	}
+	fdata := common.LoggerData{}
+	for _, f := range files {
+		fdata[f.Path] = fmt.Sprintf("mode=%v, is-template=%T, byte-counts=%d", f.Mode, f.Template, len(f.Content))
+	}
+	logger.DebugWithData("parsed files", fdata)
+
 	var input common.InputVariables
 	if cmd.inputYAML != "" {
+		logger.InfoWithData("loading template variables from file", common.LoggerData{"filepath": cmd.inputYAML})
 		fileInput, err := spec.InputFromFile(cmd.inputYAML)
 		if err != nil {
 			return err
 		}
 		input = fileInput
 	} else {
+		logger.Info("getting template variables dynamically")
 		stdinInput, err := spec.InputFromStdIn()
 		if err != nil {
 			return err
@@ -106,12 +121,13 @@ func (cmd *Command) Run() error {
 		input = stdinInput
 	}
 
+	logger.Info("creating new project")
 	err = write.Write(cmd.dest, files, input)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[INFO] Done!")
+	logger.Info("done")
 	return nil
 }
 

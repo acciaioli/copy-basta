@@ -32,7 +32,7 @@ install:
 
 demo-generate: install
 	@ echo ">> running demo generate command"
-	@ cd ./internal; make run > /dev/null
+	@ cd ./internal; make run
 	@ echo ">> done"
 
 
@@ -47,4 +47,9 @@ demo-init: install
 	@ rm -rf $(gen)
 	@ copy-basta generate --src=$(tmpl) --dest=$(gen)
 	@ sh $(exec)
+	@ echo ">> done"
+
+demo-logs: install
+	@ echo ">> running logging demo"
+	@ cd internal/demo-log; go run main.go
 	@ echo ">> done"

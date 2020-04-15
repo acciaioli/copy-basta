@@ -3,7 +3,6 @@ package parse
 import (
 	"io"
 	"io/ioutil"
-	"log"
 	"path/filepath"
 	"strings"
 )
@@ -56,7 +55,6 @@ func (i *Ignorer) ignore(s string) bool {
 				break
 			}
 			if target == dir {
-				log.Println("excluded dir")
 				return true
 			}
 		}
@@ -65,7 +63,6 @@ func (i *Ignorer) ignore(s string) bool {
 	for _, pattern := range i.patterns {
 		matched, err := filepath.Match(pattern, s)
 		if err != nil {
-			log.Println("danger danger....")
 			return false
 		}
 		if matched {
