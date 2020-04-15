@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
 /*
@@ -98,7 +100,8 @@ func (v *SpecVariable) valueOk(value interface{}) error {
 }
 
 func (v *SpecVariable) prompt() string {
-	text := fmt.Sprintf("%s [%s]", v.Name, v.Type)
+	coloredName := common.ColoredFormat(common.ColorGreen, common.TextFormatBold, common.BGColorNone, v.Name)
+	text := fmt.Sprintf("%s [%s]", coloredName, v.Type)
 	if v.Description != nil {
 		text = fmt.Sprintf("%s (%s)\n", text, *v.Description)
 	} else {
