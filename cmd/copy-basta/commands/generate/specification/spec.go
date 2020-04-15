@@ -47,31 +47,6 @@ func newFromReader(r io.Reader) (*Spec, error) {
 	return &spec, nil
 }
 
-func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
-	r := bufio.NewReader(os.Stdin)
-
-	inputVars := common.InputVariables{}
-
-	for _, v := range spec.Variables {
-		userInput, err := promptLoop(r, v)
-		if err != nil {
-			return nil, err
-		}
-
-		if userInput != nil {
-			value, err := v.process(*userInput)
-			if err != nil {
-				return nil, err
-			}
-			inputVars[v.Name] = value
-		} else {
-			inputVars[v.Name] = v.Default
-		}
-	}
-
-	return inputVars, nil
-}
-
 func (spec *Spec) InputFromFile(inputYAML string) (common.InputVariables, error) {
 	yamlFile, err := ioutil.ReadFile(inputYAML)
 	if err != nil {
@@ -102,10 +77,35 @@ func (spec *Spec) InputFromFile(inputYAML string) (common.InputVariables, error)
 	return input, nil
 }
 
+func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
+	r := bufio.NewReader(os.Stdin)
+
+	inputVars := common.InputVariables{}
+	for _, v := range spec.Variables {
+		userInput, err := promptLoop(r, v)
+		if err != nil {
+			return nil, err
+		}
+
+		if userInput != nil {
+			value, err := v.process(*userInput)
+			if err != nil {
+				return nil, err
+			}
+			inputVars[v.Name] = value
+		} else {
+			inputVars[v.Name] = v.Default
+		}
+	}
+	return inputVars, nil
+}
+
 func promptLoop(r *bufio.Reader, v SpecVariable) (*string, error) {
+	fmt.Print("\n")
 	for {
 		fmt.Print(v.prompt())
 		userInput, err := r.ReadString('\n')
+		fmt.Print("\n")
 		if err != nil {
 			return nil, err
 		}
@@ -118,5 +118,6 @@ func promptLoop(r *bufio.Reader, v SpecVariable) (*string, error) {
 		if v.Default != nil {
 			return nil, nil
 		}
+
 	}
 }

@@ -100,18 +100,26 @@ func (v *SpecVariable) valueOk(value interface{}) error {
 }
 
 func (v *SpecVariable) prompt() string {
+	var lines = []string{}
+	qMark := common.ColoredFormat(common.ColorOrange, common.TextFormatBold, common.BGColorNone, "?")
 	coloredName := common.ColoredFormat(common.ColorGreen, common.TextFormatBold, common.BGColorNone, v.Name)
-	text := fmt.Sprintf("%s [%s]", coloredName, v.Type)
+	coloredType := common.ColoredFormat(common.ColorCyan, common.TextFormatBold, common.BGColorNone, string(v.Type))
+
 	if v.Description != nil {
-		text = fmt.Sprintf("%s (%s)\n", text, *v.Description)
+		coloredDescription := common.ColoredFormat(common.ColorGreen, common.TextFormatNormal, common.BGColorNone, *v.Description)
+		lines = append(lines, fmt.Sprintf("%s [%s] ", coloredDescription, coloredType))
 	} else {
-		text = fmt.Sprintf("%s\n", text)
+		lines = append(lines, fmt.Sprintf("[%s]", coloredType))
 	}
 
 	if v.Default != nil {
-		text = fmt.Sprintf("%s[%v]", text, v.Default)
+		coloredDefault := common.ColoredFormat(common.ColorOrange, common.TextFormatNormal, common.BGColorNone, fmt.Sprintf("%v", v.Default))
+		lines = append(lines, fmt.Sprintf("%s %s [%v]    ", qMark, coloredName, coloredDefault))
+	} else {
+		lines = append(lines, fmt.Sprintf("%s %s    ", qMark, coloredName))
 	}
-	return fmt.Sprintf("%s=>", text)
+
+	return strings.Join(lines, "\n")
 }
 
 func (v *SpecVariable) process(s string) (interface{}, error) {
