@@ -36,6 +36,10 @@ deploy:
   file:
   - ./copy-basta
   skip_cleanup: true
+  tag_name: tag_name
+  name: name
+  body: This is the body
   draft: true
+  prerelease: false
   on:
     tags: true
