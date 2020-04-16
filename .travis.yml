@@ -26,10 +26,15 @@ script:
 before_deploy:
   - go build ./cmd/copy-basta
 
+# GITHUB_PERSONAL_ACCESS_TOKEN
+# 1) go to https://github.com/settings/tokens
+# 2) generate token with `repo` scopes
+# 3) add key to travis env variables
 deploy:
   provider: releases
   api_key: $GITHUB_PERSONAL_ACCESS_TOKEN
-  file: copy-basta
+  file:
+  - ./copy-basta
   skip_cleanup: true
   draft: true
   on:
