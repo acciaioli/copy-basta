@@ -36,7 +36,7 @@ deploy:
   file:
   - ./copy-basta
   skip_cleanup: true
-  name: name
+  name: v$TRAVIS_TAG
   body: "This is the body"
   draft: true
   prerelease: false
