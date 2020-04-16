@@ -31,7 +31,7 @@ const (
 )
 
 func StringToLevel(s string) (Level, error) {
-	switch strings.ToLower(s) {
+	switch strings.ToUpper(s) {
 	case debugS:
 		return Debug, nil
 	case infoS:
