@@ -71,6 +71,33 @@ func NewTemplateError(userMsg string, opts ...ErrorOption) error {
 	return newError(Template, &userMsg, opts...)
 }
 
+type Error2 struct {
+	s string
+
+	extErr error
+	trace  string
+}
+
+func (e *Error2) Error() string {
+	return e.s
+}
+
+func (e *Error2) DebugData() map[string]interface{} {
+	return map[string]interface{}{
+		"original-error": func() string {
+			if e.extErr != nil {
+				return e.extErr.Error()
+			}
+			return ""
+		},
+		"trace": e.trace,
+	}
+}
+
+func NewError2(s string, extErr error) error {
+	return &Error2{s: s, extErr: extErr}
+}
+
 func NewFlagValidationError(flag string, reason string) error {
-	return fmt.Errorf(`"--%s" %s`, flag, reason)
+	return &Error2{s: fmt.Sprintf(`"--%s" %s`, flag, reason)}
 }

@@ -22,33 +22,33 @@ func Test_Logger(t *testing.T) {
 
 	tests := []struct {
 		level    Level
-		logFunc  func(*Logger)
+		logFunc  func(Logger)
 		expected []string
 	}{
 		{
 			level: Debug,
-			logFunc: func(l *Logger) {
+			logFunc: func(l Logger) {
 				l.Debug(msg)
 			},
 			expected: []string{msg, "[DEBUG]", string(common.ColorGray)},
 		},
 		{
 			level: Info,
-			logFunc: func(l *Logger) {
+			logFunc: func(l Logger) {
 				l.InfoWithData(msg, LoggerData{"Value From": "LoggingData"})
 			},
 			expected: []string{msg, "[INFO]", string(common.ColorBlue), "Value From", "LoggingData"},
 		},
 		{
 			level: Warn,
-			logFunc: func(l *Logger) {
+			logFunc: func(l Logger) {
 				l.Warn(msg)
 			},
 			expected: []string{msg, "[WARN]", string(common.ColorOrange)},
 		},
 		{
 			level: Error,
-			logFunc: func(l *Logger) {
+			logFunc: func(l Logger) {
 				l.ErrorWithData(msg, LoggerData{"Forty-Three": 43})
 			},
 			expected: []string{msg, "[ERROR]", string(common.ColorRed), "Forty-Three", "43"},

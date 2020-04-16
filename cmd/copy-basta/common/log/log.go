@@ -10,7 +10,11 @@ import (
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
-var Log Logger
+var TheLogger Logger
+
+func init() {
+	TheLogger = NewLogger()
+}
 
 type Level int
 
@@ -57,27 +61,30 @@ type Logger struct {
 
 type LoggerData map[string]interface{}
 
-type LoggerOpt func(*Logger)
+type LoggerOpt func(Logger) Logger
 
 func WithLevel(level Level) LoggerOpt {
-	return func(l *Logger) {
+	return func(l Logger) Logger {
 		l.level = level
+		return l
 	}
 }
 
 func WithWriter(writer io.Writer) LoggerOpt {
-	return func(l *Logger) {
+	return func(l Logger) Logger {
 		l.writer = writer
+		return l
 	}
 }
 
 func WithTraceData() LoggerOpt {
-	return func(l *Logger) {
+	return func(l Logger) Logger {
 		l.trace = true
+		return l
 	}
 }
 
-func NewLogger(opts ...LoggerOpt) *Logger {
+func NewLogger(opts ...LoggerOpt) Logger {
 	l := Logger{
 		level:  Warn,
 		writer: os.Stdout,
@@ -91,11 +98,11 @@ func NewLogger(opts ...LoggerOpt) *Logger {
 		},
 	}
 	for _, o := range opts {
-		o(&l)
+		l = o(l)
 	}
 
 	l.DebugWithData("new logger created", LoggerData{"level": l.level, "writer is stdout": l.writer == os.Stdout})
-	return &l
+	return l
 }
 
 func (l *Logger) Debug(msg string) {
@@ -150,7 +157,7 @@ func (l *Logger) log(level Level, data LoggerData, userMsg string) {
 
 	lineBuilder := strings.Builder{}
 	lineBuilder.WriteString(fmt.Sprintf("%s	%s", levelMsg, userMsg))
-	if l.trace {
+	if l.trace || level == Debug {
 		if _, fn, fl, ok := runtime.Caller(2); ok {
 			lineBuilder.WriteString(fmt.Sprintf("	@ %s:%d", fn, fl))
 		}

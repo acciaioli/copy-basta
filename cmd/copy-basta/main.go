@@ -22,13 +22,12 @@ const (
 )
 
 func main() {
-	logger := log.NewLogger()
-	if err := execute(logger); err != nil {
-		logger.Error(err.Error())
+	if err := execute(); err != nil {
+		log.TheLogger.Error(err.Error())
 	}
 }
 
-func execute(logger *log.Logger) error {
+func execute() error {
 	cmd := &cobra.Command{
 		Use:   cmdUse,
 		Short: cmdShort,
@@ -37,8 +36,8 @@ func execute(logger *log.Logger) error {
 	var logLevel string
 	cmd.PersistentFlags().StringVar(&logLevel, flagLogLevel, flagLogLevelDefault, flagLogLevelDescription)
 
-	cmd.AddCommand(newCobraCommand(generate.NewCommand(logger)))
-	cmd.AddCommand(newCobraCommand(initialize.NewCommand(logger)))
+	cmd.AddCommand(newCobraCommand(generate.NewCommand()))
+	cmd.AddCommand(newCobraCommand(initialize.NewCommand()))
 
 	return cmd.Execute()
 }

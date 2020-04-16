@@ -35,16 +35,14 @@ const (
 )
 
 type Command struct {
-	logger *log.Logger
-
 	src       string
 	dest      string
 	specYAML  string
 	inputYAML string
 }
 
-func NewCommand(logger *log.Logger) *Command {
-	return &Command{logger: logger}
+func NewCommand() *Command {
+	return &Command{}
 }
 
 func (cmd *Command) Name() string {
@@ -85,24 +83,24 @@ func (cmd *Command) Flags() []common.CommandFlag {
 }
 
 func (cmd *Command) Run() error {
-	cmd.logger.DebugWithData("user input", log.LoggerData{
+	log.TheLogger.DebugWithData("user input", log.LoggerData{
 		flagSrc:   cmd.src,
 		flagDest:  cmd.dest,
 		flagSpec:  cmd.specYAML,
 		flagInput: cmd.inputYAML,
 	})
-	cmd.logger.Info("validating user input")
+	log.TheLogger.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	cmd.logger.Info("loading specification file")
+	log.TheLogger.Info("loading specification file")
 	spec, err := specification.New(cmd.specFullPath())
 	if err != nil {
 		return err
 	}
 
-	cmd.logger.Info("parsing template files")
+	log.TheLogger.Info("parsing template files")
 	files, err := parse.Parse(cmd.src)
 	if err != nil {
 		return err
@@ -111,18 +109,18 @@ func (cmd *Command) Run() error {
 	for _, f := range files {
 		fdata[f.Path] = fmt.Sprintf("mode=%v, is-template=%T, byte-counts=%d", f.Mode, f.Template, len(f.Content))
 	}
-	cmd.logger.DebugWithData("parsed files", fdata)
+	log.TheLogger.DebugWithData("parsed files", fdata)
 
 	var input common.InputVariables
 	if cmd.inputYAML != "" {
-		cmd.logger.InfoWithData("loading template variables from file", log.LoggerData{"filepath": cmd.inputYAML})
+		log.TheLogger.InfoWithData("loading template variables from file", log.LoggerData{"location": cmd.inputYAML})
 		fileInput, err := spec.InputFromFile(cmd.inputYAML)
 		if err != nil {
 			return err
 		}
 		input = fileInput
 	} else {
-		cmd.logger.Info("getting template variables dynamically")
+		log.TheLogger.Info("getting template variables dynamically")
 		stdinInput, err := spec.InputFromStdIn()
 		if err != nil {
 			return err
@@ -130,13 +128,13 @@ func (cmd *Command) Run() error {
 		input = stdinInput
 	}
 
-	cmd.logger.Info("creating new project")
+	log.TheLogger.InfoWithData("creating new project", log.LoggerData{"location": cmd.dest})
 	err = write.Write(cmd.dest, files, input)
 	if err != nil {
 		return err
 	}
 
-	cmd.logger.Info("done")
+	log.TheLogger.Info("done")
 	return nil
 }
 

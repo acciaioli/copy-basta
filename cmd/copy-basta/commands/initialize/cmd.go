@@ -22,13 +22,11 @@ const (
 )
 
 type Command struct {
-	logger *log.Logger
-
 	name string
 }
 
-func NewCommand(logger *log.Logger) *Command {
-	return &Command{logger: logger}
+func NewCommand() *Command {
+	return &Command{}
 }
 
 func (cmd *Command) Name() string {
@@ -51,21 +49,21 @@ func (cmd *Command) Flags() []common.CommandFlag {
 }
 
 func (cmd *Command) Run() error {
-	cmd.logger.DebugWithData("user input", log.LoggerData{
+	log.TheLogger.DebugWithData("user input", log.LoggerData{
 		flagName: cmd.name,
 	})
-	cmd.logger.Info("validating user input")
+	log.TheLogger.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	cmd.logger.InfoWithData("bootstrapping new template project", log.LoggerData{"filepath": cmd.name})
+	log.TheLogger.InfoWithData("bootstrapping new template project", log.LoggerData{"location": cmd.name})
 	err := bootstrap.Bootstrap(cmd.name)
 	if err != nil {
 		return err
 	}
 
-	cmd.logger.Info("done")
+	log.TheLogger.Info("done")
 	return nil
 }
 
@@ -74,12 +72,8 @@ func (cmd *Command) validate() error {
 		return uerrors.NewFlagValidationError(flagName, "is required")
 	}
 
-	if _, err := os.Stat(cmd.name); err != nil {
-		if os.IsNotExist(err) {
-			return uerrors.NewFlagValidationError(flagName, fmt.Sprintf("(%s) directory not found", cmd.name))
-		} else {
-			return err
-		}
+	if _, err := os.Stat(cmd.name); err == nil {
+		return uerrors.NewFlagValidationError(flagName, fmt.Sprintf("(%s) directory already exists", cmd.name))
 	}
 	return nil
 }
