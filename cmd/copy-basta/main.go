@@ -2,33 +2,43 @@ package main
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate"
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/initialize"
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
+const (
+	version = "poc"
+
+	cmdUse   = "copy-basta"
+	cmdShort = "copy-basta utility"
+	cmdLong  = "Basta! Stop copying.\n\nThis CLI can be used to bootstrap go projects in seconds, and stop the copy paste madness"
+
+	flagLogLevel            = "log-level"
+	flagLogLevelDefault     = "info"
+	flagLogLevelDescription = "Used to set the logging level.\nAvailable options: [debug, info, warn, error, fatal]"
+)
+
 func main() {
-	err := execute()
-	if err != nil {
-		panic(err)
+	logger := log.NewLogger()
+	if err := execute(logger); err != nil {
+		logger.Error(err.Error())
 	}
 }
 
-func execute() error {
+func execute(logger *log.Logger) error {
 	cmd := &cobra.Command{
-		Use:   "copy-basta",
-		Short: "copy-basta utility",
-		Long: `Basta! Stop copying.
-
-This CLI can be used to bootstrap go projects in seconds, and stop the copy paste madness`,
+		Use:   cmdUse,
+		Short: cmdShort,
+		Long:  cmdLong,
 	}
 	var logLevel string
-	cmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", `Used to set the logging level. 
-Available options: [debug, info, warn, error, fatal]`)
+	cmd.PersistentFlags().StringVar(&logLevel, flagLogLevel, flagLogLevelDefault, flagLogLevelDescription)
 
-	cmd.AddCommand(newCobraCommand(generate.NewCommand(), logLevel))
-	cmd.AddCommand(newCobraCommand(initialize.NewCommand(), logLevel))
+	cmd.AddCommand(newCobraCommand(generate.NewCommand(logger)))
+	cmd.AddCommand(newCobraCommand(initialize.NewCommand(logger)))
 
 	return cmd.Execute()
 }
@@ -37,20 +47,19 @@ type CommandInterface interface {
 	Name() string
 	Description() string
 	Flags() []common.CommandFlag
-	Run(*common.Logger) error
+	Run() error
 }
 
-func newCobraCommand(cmd CommandInterface, logLevel string) *cobra.Command {
+func newCobraCommand(cmd CommandInterface) *cobra.Command {
 	cobraCmd := &cobra.Command{
-		Use:   cmd.Name(),
-		Short: cmd.Description(),
+		Version: version,
+		Use:     cmd.Name(),
+		Short:   cmd.Description(),
 		RunE: func(*cobra.Command, []string) error {
-			logger, err := common.NewLogger(common.WithLevelS(logLevel))
-			if err != nil {
-				return err
-			}
-			return cmd.Run(logger)
+			return cmd.Run()
 		},
+		SilenceErrors: true,
+		SilenceUsage:  false,
 	}
 
 	for _, flag := range cmd.Flags() {

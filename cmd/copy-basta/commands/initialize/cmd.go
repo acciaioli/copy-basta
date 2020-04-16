@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/initialize/bootstrap"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
@@ -18,11 +20,13 @@ const (
 )
 
 type Command struct {
+	logger *log.Logger
+
 	name string
 }
 
-func NewCommand() *Command {
-	return &Command{}
+func NewCommand(logger *log.Logger) *Command {
+	return &Command{logger: logger}
 }
 
 func (cmd *Command) Name() string {
@@ -44,31 +48,31 @@ func (cmd *Command) Flags() []common.CommandFlag {
 	}
 }
 
-func (cmd *Command) Run(logger *common.Logger) error {
-	logger.DebugWithData("user input", common.LoggerData{
+func (cmd *Command) Run() error {
+	cmd.logger.DebugWithData("user input", log.LoggerData{
 		flagName: cmd.name,
 	})
-	logger.Info("validating user input")
+	cmd.logger.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	logger.InfoWithData("bootstrapping new template project", common.LoggerData{"filepath": cmd.name})
+	cmd.logger.InfoWithData("bootstrapping new template project", log.LoggerData{"filepath": cmd.name})
 	err := bootstrap.Bootstrap(cmd.name)
 	if err != nil {
 		return err
 	}
 
-	logger.Info("done")
+	cmd.logger.Info("done")
 	return nil
 }
 
 func (cmd *Command) validate() error {
 	if cmd.name == "" {
-		return fmt.Errorf(`[ERROR] "%s" is required`, flagName)
+		return fmt.Errorf("invalid flag: --%s is required", flagName)
 	}
 	if _, err := os.Stat(cmd.name); err == nil {
-		return fmt.Errorf(`[ERROR] "%s" (%s) already exists`, flagName, cmd.name)
+		return fmt.Errorf("invalid flag: --%s (%s) already exists", flagName, cmd.name)
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-package common
+package log
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
 var Log Logger
@@ -41,66 +43,59 @@ func sToLevel(s string) (Level, error) {
 	case "fatal":
 		return Fatal, nil
 	default:
-		return Fatal, fmt.Errorf("invalid log level representation `%s`", s)
+		return Fatal, fmt.Errorf("invalid log-level string representation `%s`", s)
 	}
 }
 
 type Logger struct {
 	level         Level
 	writer        io.Writer
-	levelColors   map[Level]Color
-	levelBGColors map[Level]BGColor
+	trace         bool
+	levelColors   map[Level]common.Color
+	levelBGColors map[Level]common.BGColor
 }
 
 type LoggerData map[string]interface{}
 
-type LoggerOpt func(*Logger) error
+type LoggerOpt func(*Logger)
 
 func WithLevel(level Level) LoggerOpt {
-	return func(l *Logger) error {
+	return func(l *Logger) {
 		l.level = level
-		return nil
-	}
-}
-
-func WithLevelS(level string) LoggerOpt {
-	return func(l *Logger) error {
-		level, err := sToLevel(level)
-		if err != nil {
-			return err
-		}
-		l.level = level
-		return nil
 	}
 }
 
 func WithWriter(writer io.Writer) LoggerOpt {
-	return func(l *Logger) error {
+	return func(l *Logger) {
 		l.writer = writer
-		return nil
 	}
 }
 
-func NewLogger(opts ...LoggerOpt) (*Logger, error) {
+func WithTraceData() LoggerOpt {
+	return func(l *Logger) {
+		l.trace = true
+	}
+}
+
+func NewLogger(opts ...LoggerOpt) *Logger {
 	l := Logger{
 		level:  Warn,
 		writer: os.Stdout,
-		levelColors: map[Level]Color{
-			Debug: ColorGray,
-			Info:  ColorBlue,
-			Warn:  ColorOrange,
-			Error: ColorRed,
-			Fatal: ColorRed,
+		trace:  false,
+		levelColors: map[Level]common.Color{
+			Debug: common.ColorGray,
+			Info:  common.ColorBlue,
+			Warn:  common.ColorOrange,
+			Error: common.ColorRed,
+			Fatal: common.ColorRed,
 		},
 	}
 	for _, o := range opts {
-		if err := o(&l); err != nil {
-			return nil, err
-		}
+		o(&l)
 	}
 
 	l.DebugWithData("new logger created", LoggerData{"level": l.level, "writer is stdout": l.writer == os.Stdout})
-	return &l, nil
+	return &l
 }
 
 func (l *Logger) Debug(msg string) {
@@ -151,35 +146,37 @@ func (l *Logger) log(level Level, data LoggerData, userMsg string) {
 
 	color := l.color(level)
 	bgColor := l.colorBG(level)
-	levelMsg := ColoredFormat(color, TextFormatBold, bgColor, levelNames[level])
-	runtimeMsg := ""
-	if level > Info {
+	levelMsg := common.ColoredFormat(color, common.TextFormatBold, bgColor, levelNames[level])
+
+	lineBuilder := strings.Builder{}
+	lineBuilder.WriteString(fmt.Sprintf("%s	%s", levelMsg, userMsg))
+	if l.trace {
 		if _, fn, fl, ok := runtime.Caller(2); ok {
-			runtimeMsg = fmt.Sprintf("@ %s:%d", fn, fl)
+			lineBuilder.WriteString(fmt.Sprintf("	@ %s:%d", fn, fl))
 		}
+	}
+	lineBuilder.WriteString("\n")
+
+	for k, v := range data {
+		fmtK := common.ColoredFormat(color, common.TextFormatNormal, bgColor, k)
+		lineBuilder.WriteString(fmt.Sprintf("        %s: %v\n", fmtK, v))
 	}
 
-	if _, err := fmt.Fprintf(l.writer, "%s	%s	%s\n", levelMsg, userMsg, runtimeMsg); err != nil {
+	if _, err := fmt.Fprint(l.writer, lineBuilder.String()); err != nil {
 		panic(err)
-	}
-	for k, v := range data {
-		fmtK := ColoredFormat(color, TextFormatNormal, bgColor, k)
-		if _, err := fmt.Fprintf(l.writer, "        %s: %v\n", fmtK, v); err != nil {
-			panic(err)
-		}
 	}
 }
 
-func (l *Logger) color(level Level) Color {
+func (l *Logger) color(level Level) common.Color {
 	if color, ok := l.levelColors[level]; ok {
 		return color
 	}
-	return ColorNone
+	return common.ColorNone
 }
 
-func (l *Logger) colorBG(level Level) BGColor {
+func (l *Logger) colorBG(level Level) common.BGColor {
 	if color, ok := l.levelBGColors[level]; ok {
 		return color
 	}
-	return BGColorNone
+	return common.BGColorNone
 }
