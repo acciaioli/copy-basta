@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common/uerrors"
-
 	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/specification"
@@ -144,25 +142,25 @@ func (cmd *Command) specFullPath() string {
 
 func (cmd *Command) validate() error {
 	if cmd.src == "" {
-		return uerrors.NewFlagValidationError(flagSrc, "is required")
+		return common.NewFlagValidationError(flagSrc, "is required")
 	}
 	if _, err := os.Stat(cmd.src); err != nil {
 		if os.IsNotExist(err) {
-			return uerrors.NewFlagValidationError(flagSrc, fmt.Sprintf("(%s) directory not found", cmd.src))
+			return common.NewFlagValidationError(flagSrc, fmt.Sprintf("(%s) directory not found", cmd.src))
 		} else {
 			return err
 		}
 	}
 
 	if cmd.dest == "" {
-		return uerrors.NewFlagValidationError(flagDest, "is required")
+		return common.NewFlagValidationError(flagDest, "is required")
 	}
 	if _, err := os.Stat(cmd.dest); err == nil {
-		return uerrors.NewFlagValidationError(flagDest, fmt.Sprintf("(%s) directory already exists", cmd.dest))
+		return common.NewFlagValidationError(flagDest, fmt.Sprintf("(%s) directory already exists", cmd.dest))
 	}
 
 	if cmd.specYAML == "" {
-		return uerrors.NewFlagValidationError(flagSpec, "is required")
+		return common.NewFlagValidationError(flagSpec, "is required")
 	}
 	specYAML := cmd.specFullPath()
 	if err := fileExists(flagSpec, specYAML); err != nil {
@@ -181,10 +179,10 @@ func (cmd *Command) validate() error {
 func fileExists(flagName string, filePath string) error {
 	fInfo, err := os.Stat(filePath)
 	if err != nil {
-		return uerrors.NewFlagValidationError(flagName, fmt.Sprintf("(%s) file not found", filePath))
+		return common.NewFlagValidationError(flagName, fmt.Sprintf("(%s) file not found", filePath))
 	}
 	if fInfo.IsDir() {
-		return uerrors.NewFlagValidationError(flagName, fmt.Sprintf("(%s) is not a file", filePath))
+		return common.NewFlagValidationError(flagName, fmt.Sprintf("(%s) is not a file", filePath))
 	}
 	return nil
 }
