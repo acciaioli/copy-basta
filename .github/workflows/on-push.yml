@@ -14,9 +14,11 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Lint
-        uses: actions-contrib/golangci-lint@v1
-#      - name: Test
-#        run: make test
-#      - name: Run Demo
-#        run: make demo-generate
+      - name: Get Linter
+        run: wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.24.0
+      - name: Run Linter
+        run: make lint
+      - name: Test
+        run: make test
+      - name: Run Demo
+        run: make demo-generate
