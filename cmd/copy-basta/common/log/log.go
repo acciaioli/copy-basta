@@ -10,13 +10,11 @@ import (
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
-var TheLogger Logger
+var L Logger
 
 func init() {
-	TheLogger = NewLogger()
+	L = NewLogger()
 }
-
-type Level int
 
 const (
 	Debug Level = iota
@@ -24,32 +22,44 @@ const (
 	Warn
 	Error
 	Fatal
-)
 
-var levelNames = map[Level]string{
-	Debug: "[DEBUG]",
-	Info:  "[INFO]",
-	Warn:  "[WARN]",
-	Error: "[ERROR]",
-	Fatal: "[FATAL]",
-}
+	debugS = "DEBUG"
+	infoS  = "INFO"
+	warnS  = "WARN"
+	errorS = "ERROR"
+	fatalS = "FATAL"
+)
 
 func StringToLevel(s string) (Level, error) {
 	switch strings.ToLower(s) {
-	case "debug":
+	case debugS:
 		return Debug, nil
-	case "info":
+	case infoS:
 		return Info, nil
-	case "warn":
+	case warnS:
 		return Warn, nil
-	case "error":
+	case errorS:
 		return Error, nil
-	case "fatal":
+	case fatalS:
 		return Fatal, nil
 	default:
 		return Fatal, fmt.Errorf("%s is not a known level", s)
 	}
 }
+
+type Level int
+
+func (lvl Level) String() string {
+	return fmt.Sprintf("[%s]", []string{
+		debugS,
+		infoS,
+		warnS,
+		errorS,
+		fatalS,
+	}[lvl])
+}
+
+type Data map[string]interface{}
 
 type Logger struct {
 	level         Level
@@ -58,8 +68,6 @@ type Logger struct {
 	levelColors   map[Level]common.Color
 	levelBGColors map[Level]common.BGColor
 }
-
-type LoggerData map[string]interface{}
 
 func NewLogger() Logger {
 	l := Logger{
@@ -76,7 +84,7 @@ func NewLogger() Logger {
 		levelBGColors: map[Level]common.BGColor{},
 	}
 
-	l.DebugWithData("new logger created", LoggerData{"level": l.level, "writer is stdout": l.writer == os.Stdout})
+	l.DebugWithData("new logger created", Data{"level": l.level, "writer is stdout": l.writer == os.Stdout})
 	return l
 }
 
@@ -108,7 +116,7 @@ func (l *Logger) Debug(msg string) {
 	l.log(Debug, nil, msg)
 }
 
-func (l *Logger) DebugWithData(msg string, data LoggerData) {
+func (l *Logger) DebugWithData(msg string, data Data) {
 	l.log(Debug, data, msg)
 }
 
@@ -116,7 +124,7 @@ func (l *Logger) Info(msg string) {
 	l.log(Info, nil, msg)
 }
 
-func (l *Logger) InfoWithData(msg string, data LoggerData) {
+func (l *Logger) InfoWithData(msg string, data Data) {
 	l.log(Info, data, msg)
 }
 
@@ -124,7 +132,7 @@ func (l *Logger) Warn(msg string) {
 	l.log(Warn, nil, msg)
 }
 
-func (l *Logger) WarnWithData(msg string, data LoggerData) {
+func (l *Logger) WarnWithData(msg string, data Data) {
 	l.log(Warn, data, msg)
 }
 
@@ -132,7 +140,7 @@ func (l *Logger) Error(msg string) {
 	l.log(Error, nil, msg)
 }
 
-func (l *Logger) ErrorWithData(msg string, data LoggerData) {
+func (l *Logger) ErrorWithData(msg string, data Data) {
 	l.log(Error, data, msg)
 }
 
@@ -141,18 +149,18 @@ func (l *Logger) Fatal(msg string) {
 	os.Exit(1)
 }
 
-func (l *Logger) FatalWithData(msg string, data LoggerData) {
+func (l *Logger) FatalWithData(msg string, data Data) {
 	l.log(Fatal, data, msg)
 }
 
-func (l *Logger) log(level Level, data LoggerData, userMsg string) {
+func (l *Logger) log(level Level, data Data, userMsg string) {
 	if l.level > level {
 		return
 	}
 
 	color := l.color(level)
 	bgColor := l.colorBG(level)
-	levelMsg := common.ColoredFormat(color, common.TextFormatBold, bgColor, levelNames[level])
+	levelMsg := common.ColoredFormat(color, common.TextFormatBold, bgColor, level.String())
 
 	lineBuilder := strings.Builder{}
 	lineBuilder.WriteString(fmt.Sprintf("%s	%s", levelMsg, userMsg))

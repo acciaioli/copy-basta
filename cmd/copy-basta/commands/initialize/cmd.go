@@ -47,21 +47,21 @@ func (cmd *Command) Flags() []common.CommandFlag {
 }
 
 func (cmd *Command) Run() error {
-	log.TheLogger.DebugWithData("user input", log.LoggerData{
+	log.L.DebugWithData("user input", log.Data{
 		flagName: cmd.name,
 	})
-	log.TheLogger.Info("validating user input")
+	log.L.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	log.TheLogger.InfoWithData("bootstrapping new template project", log.LoggerData{"location": cmd.name})
+	log.L.InfoWithData("bootstrapping new template project", log.Data{"location": cmd.name})
 	err := bootstrap.Bootstrap(cmd.name)
 	if err != nil {
 		return err
 	}
 
-	log.TheLogger.Info("done")
+	log.L.Info("done")
 	return nil
 }
 

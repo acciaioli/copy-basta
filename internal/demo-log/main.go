@@ -9,8 +9,8 @@ func main() {
 	logger.SetLevel(log.Debug)
 
 	msg := "Hello Logging!"
-	logger.DebugWithData(msg, log.LoggerData{"With": "Data", "Seventy Five": 75})
+	logger.DebugWithData(msg, log.Data{"With": "Data", "Seventy Five": 75})
 	logger.Info(msg)
-	logger.WarnWithData(msg, log.LoggerData{"Your Last": "Warning!", "True?": true})
+	logger.WarnWithData(msg, log.Data{"Your Last": "Warning!", "True?": true})
 	logger.Error(msg)
 }

@@ -50,7 +50,7 @@ func write(destDir string, files []common.File, input common.InputVariables) err
 
 func cleanup(destDir string) {
 	if err := os.RemoveAll(destDir); err != nil {
-		log.TheLogger.DebugWithData("external error", log.LoggerData{"error": err.Error()})
+		log.L.DebugWithData("external error", log.Data{"error": err.Error()})
 	}
 }
 

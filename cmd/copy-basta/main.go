@@ -25,7 +25,7 @@ const (
 
 func main() {
 	if err := execute(); err != nil {
-		log.TheLogger.Error(err.Error())
+		log.L.Error(err.Error())
 		fmt.Println("command failed.")
 	}
 }
@@ -66,7 +66,7 @@ func newCobraCommand(cmd CommandInterface) *cobra.Command {
 			if err != nil {
 				return common.NewFlagValidationError(flagLogLevel, err.Error())
 			}
-			log.TheLogger.SetLevel(logLevel)
+			log.L.SetLevel(logLevel)
 			return cmd.Run()
 		},
 		SilenceErrors: true,

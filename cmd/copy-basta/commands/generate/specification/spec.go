@@ -40,7 +40,7 @@ func New(specsYAML string) (*Spec, error) {
 func newFromReader(r io.Reader) (*Spec, error) {
 	spec := Spec{}
 	if err := yaml.NewDecoder(r).Decode(&spec); err != nil {
-		log.TheLogger.DebugWithData("external error", log.LoggerData{"error": err.Error()})
+		log.L.DebugWithData("external error", log.Data{"error": err.Error()})
 		return nil, errors.New("specification yaml file error: failed to decode yaml")
 	}
 

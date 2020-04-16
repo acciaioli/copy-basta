@@ -81,44 +81,44 @@ func (cmd *Command) Flags() []common.CommandFlag {
 }
 
 func (cmd *Command) Run() error {
-	log.TheLogger.DebugWithData("user input", log.LoggerData{
+	log.L.DebugWithData("user input", log.Data{
 		flagSrc:   cmd.src,
 		flagDest:  cmd.dest,
 		flagSpec:  cmd.specYAML,
 		flagInput: cmd.inputYAML,
 	})
-	log.TheLogger.Info("validating user input")
+	log.L.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	log.TheLogger.Info("loading specification file")
+	log.L.Info("loading specification file")
 	spec, err := specification.New(cmd.specFullPath())
 	if err != nil {
 		return err
 	}
 
-	log.TheLogger.Info("parsing template files")
+	log.L.Info("parsing template files")
 	files, err := parse.Parse(cmd.src)
 	if err != nil {
 		return err
 	}
-	fdata := log.LoggerData{}
+	fdata := log.Data{}
 	for _, f := range files {
 		fdata[f.Path] = fmt.Sprintf("mode=%v, is-template=%T, byte-counts=%d", f.Mode, f.Template, len(f.Content))
 	}
-	log.TheLogger.DebugWithData("parsed files", fdata)
+	log.L.DebugWithData("parsed files", fdata)
 
 	var input common.InputVariables
 	if cmd.inputYAML != "" {
-		log.TheLogger.InfoWithData("loading template variables from file", log.LoggerData{"location": cmd.inputYAML})
+		log.L.InfoWithData("loading template variables from file", log.Data{"location": cmd.inputYAML})
 		fileInput, err := spec.InputFromFile(cmd.inputYAML)
 		if err != nil {
 			return err
 		}
 		input = fileInput
 	} else {
-		log.TheLogger.Info("getting template variables dynamically")
+		log.L.Info("getting template variables dynamically")
 		stdinInput, err := spec.InputFromStdIn()
 		if err != nil {
 			return err
@@ -126,13 +126,13 @@ func (cmd *Command) Run() error {
 		input = stdinInput
 	}
 
-	log.TheLogger.InfoWithData("creating new project", log.LoggerData{"location": cmd.dest})
+	log.L.InfoWithData("creating new project", log.Data{"location": cmd.dest})
 	err = write.Write(cmd.dest, files, input)
 	if err != nil {
 		return err
 	}
 
-	log.TheLogger.Info("done")
+	log.L.Info("done")
 	return nil
 }
 

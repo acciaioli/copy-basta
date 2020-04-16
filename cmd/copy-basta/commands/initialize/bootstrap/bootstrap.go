@@ -58,7 +58,7 @@ func bootstrap(destDir string) error {
 
 func cleanup(destDir string) {
 	if err := os.RemoveAll(destDir); err != nil {
-		log.TheLogger.DebugWithData("external error", log.LoggerData{"error": err.Error()})
+		log.L.DebugWithData("external error", log.Data{"error": err.Error()})
 	}
 }
 

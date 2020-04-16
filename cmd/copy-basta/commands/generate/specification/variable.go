@@ -96,7 +96,7 @@ func (v *SpecVariable) valueOk(value interface{}) error {
 	case openAPiObject:
 		acceptedKinds = []reflect.Kind{reflect.Map}
 	default:
-		log.TheLogger.DebugWithData("default case should not run", log.LoggerData{"type": v.Type, "value": value})
+		log.L.DebugWithData("default case should not run", log.Data{"type": v.Type, "value": value})
 		return fmt.Errorf(`variable error: %s is not a valid type. 
 only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, v.Type)
 	}
@@ -156,13 +156,13 @@ func (v *SpecVariable) process(s string) (interface{}, error) {
 		}
 		value = valueMap
 	default:
-		log.TheLogger.DebugWithData("default case should not run", log.LoggerData{"type": v.Type, "value": value})
+		log.L.DebugWithData("default case should not run", log.Data{"type": v.Type, "value": value})
 		return nil, fmt.Errorf(`variable error: %s is not a valid type. 
 only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, v.Type)
 	}
 
 	if err != nil {
-		log.TheLogger.DebugWithData("external error", log.LoggerData{"type": v.Type, "string-value": value, "error": err.Error()})
+		log.L.DebugWithData("external error", log.Data{"type": v.Type, "string-value": value, "error": err.Error()})
 		err = fmt.Errorf("variable value error: failed to parse string-value %s, open-api type is %s", value, v.Type)
 	}
 	return value, err

@@ -35,7 +35,7 @@ func Test_Logger(t *testing.T) {
 		{
 			level: Info,
 			logFunc: func(l Logger) {
-				l.InfoWithData(msg, LoggerData{"Value From": "LoggingData"})
+				l.InfoWithData(msg, Data{"Value From": "LoggingData"})
 			},
 			expected: []string{msg, "[INFO]", string(common.ColorBlue), "Value From", "LoggingData"},
 		},
@@ -49,14 +49,14 @@ func Test_Logger(t *testing.T) {
 		{
 			level: Error,
 			logFunc: func(l Logger) {
-				l.ErrorWithData(msg, LoggerData{"Forty-Three": 43})
+				l.ErrorWithData(msg, Data{"Forty-Three": 43})
 			},
 			expected: []string{msg, "[ERROR]", string(common.ColorRed), "Forty-Three", "43"},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%s @ Debug", levelNames[tt.level]), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s @ Debug", tt.level.String()), func(t *testing.T) {
 			w := &strings.Builder{}
 			logger := NewLogger()
 			logger.SetLevel(Debug)
@@ -69,7 +69,7 @@ func Test_Logger(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%s @ Fatal", levelNames[tt.level]), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s @ Fatal", tt.level.String()), func(t *testing.T) {
 			w := &strings.Builder{}
 			logger := NewLogger()
 			logger.SetLevel(Fatal)
