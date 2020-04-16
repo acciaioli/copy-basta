@@ -34,7 +34,7 @@ var levelNames = map[Level]string{
 	Fatal: "[FATAL]",
 }
 
-func sToLevel(s string) (Level, error) {
+func StringToLevel(s string) (Level, error) {
 	switch strings.ToLower(s) {
 	case "debug":
 		return Debug, nil
@@ -47,7 +47,7 @@ func sToLevel(s string) (Level, error) {
 	case "fatal":
 		return Fatal, nil
 	default:
-		return Fatal, fmt.Errorf("invalid log-level string representation `%s`", s)
+		return Fatal, fmt.Errorf("%s is not a known level", s)
 	}
 }
 
@@ -61,30 +61,7 @@ type Logger struct {
 
 type LoggerData map[string]interface{}
 
-type LoggerOpt func(Logger) Logger
-
-func WithLevel(level Level) LoggerOpt {
-	return func(l Logger) Logger {
-		l.level = level
-		return l
-	}
-}
-
-func WithWriter(writer io.Writer) LoggerOpt {
-	return func(l Logger) Logger {
-		l.writer = writer
-		return l
-	}
-}
-
-func WithTraceData() LoggerOpt {
-	return func(l Logger) Logger {
-		l.trace = true
-		return l
-	}
-}
-
-func NewLogger(opts ...LoggerOpt) Logger {
+func NewLogger() Logger {
 	l := Logger{
 		level:  Warn,
 		writer: os.Stdout,
@@ -96,13 +73,35 @@ func NewLogger(opts ...LoggerOpt) Logger {
 			Error: common.ColorRed,
 			Fatal: common.ColorRed,
 		},
-	}
-	for _, o := range opts {
-		l = o(l)
+		levelBGColors: map[Level]common.BGColor{},
 	}
 
 	l.DebugWithData("new logger created", LoggerData{"level": l.level, "writer is stdout": l.writer == os.Stdout})
 	return l
+}
+
+func (l *Logger) SetLevel(level Level) {
+	l.level = level
+}
+
+func (l *Logger) SetWriter(writer io.Writer) {
+	l.writer = writer
+}
+
+func (l *Logger) EnableTrace() {
+	l.trace = true
+}
+
+func (l *Logger) DisableTrace() {
+	l.trace = true
+}
+
+func (l *Logger) SetColor(level Level, color common.Color) {
+	l.levelColors[level] = color
+}
+
+func (l *Logger) SetBGColor(level Level, bgColor common.BGColor) {
+	l.levelBGColors[level] = bgColor
 }
 
 func (l *Logger) Debug(msg string) {

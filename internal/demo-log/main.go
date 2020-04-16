@@ -5,7 +5,8 @@ import (
 )
 
 func main() {
-	logger := log.NewLogger(log.WithLevel(log.Debug))
+	logger := log.NewLogger()
+	logger.SetLevel(log.Debug)
 
 	msg := "Hello Logging!"
 	logger.DebugWithData(msg, log.LoggerData{"With": "Data", "Seventy Five": 75})

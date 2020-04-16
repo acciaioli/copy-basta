@@ -57,21 +57,25 @@ func Test_Logger(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s @ Debug", levelNames[tt.level]), func(t *testing.T) {
-			b := &strings.Builder{}
-			logger := NewLogger(WithLevel(Debug), WithWriter(b))
+			w := &strings.Builder{}
+			logger := NewLogger()
+			logger.SetLevel(Debug)
+			logger.SetWriter(w)
 			tt.logFunc(logger)
 			for _, s := range tt.expected {
-				require.Contains(t, b.String(), s)
+				require.Contains(t, w.String(), s)
 			}
 		})
 	}
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s @ Fatal", levelNames[tt.level]), func(t *testing.T) {
-			b := &strings.Builder{}
-			logger := NewLogger(WithLevel(Fatal), WithWriter(b))
+			w := &strings.Builder{}
+			logger := NewLogger()
+			logger.SetLevel(Fatal)
+			logger.SetWriter(w)
 			tt.logFunc(logger)
-			require.Equal(t, "", b.String())
+			require.Equal(t, "", w.String())
 		})
 	}
 }

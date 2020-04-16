@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
 
@@ -10,7 +12,7 @@ import (
 )
 
 const (
-	version = "poc"
+	version = "snapshot" // build-time variable
 
 	cmdUse   = "copy-basta"
 	cmdShort = "copy-basta utility"
@@ -24,17 +26,23 @@ const (
 func main() {
 	if err := execute(); err != nil {
 		log.TheLogger.Error(err.Error())
+		fmt.Println("command failed.")
 	}
 }
 
+var globals = struct {
+	logLevel string
+}{}
+
 func execute() error {
 	cmd := &cobra.Command{
-		Use:   cmdUse,
-		Short: cmdShort,
-		Long:  cmdLong,
+		Use:     cmdUse,
+		Short:   cmdShort,
+		Long:    cmdLong,
+		Version: version,
 	}
-	var logLevel string
-	cmd.PersistentFlags().StringVar(&logLevel, flagLogLevel, flagLogLevelDefault, flagLogLevelDescription)
+
+	cmd.PersistentFlags().StringVar(&globals.logLevel, flagLogLevel, flagLogLevelDefault, flagLogLevelDescription)
 
 	cmd.AddCommand(newCobraCommand(generate.NewCommand()))
 	cmd.AddCommand(newCobraCommand(initialize.NewCommand()))
@@ -51,10 +59,14 @@ type CommandInterface interface {
 
 func newCobraCommand(cmd CommandInterface) *cobra.Command {
 	cobraCmd := &cobra.Command{
-		Version: version,
-		Use:     cmd.Name(),
-		Short:   cmd.Description(),
+		Use:   cmd.Name(),
+		Short: cmd.Description(),
 		RunE: func(*cobra.Command, []string) error {
+			logLevel, err := log.StringToLevel(globals.logLevel)
+			if err != nil {
+				return common.NewFlagValidationError(flagLogLevel, err.Error())
+			}
+			log.TheLogger.SetLevel(logLevel)
 			return cmd.Run()
 		},
 		SilenceErrors: true,

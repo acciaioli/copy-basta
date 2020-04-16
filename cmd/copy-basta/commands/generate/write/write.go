@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
@@ -48,6 +50,7 @@ func write(destDir string, files []common.File, input common.InputVariables) err
 
 func cleanup(destDir string) {
 	if err := os.RemoveAll(destDir); err != nil {
+		log.TheLogger.DebugWithData("external error", log.LoggerData{"error": err.Error()})
 	}
 }
 
