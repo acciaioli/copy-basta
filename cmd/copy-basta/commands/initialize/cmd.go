@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/common/uerrors"
+
 	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/initialize/bootstrap"
@@ -69,10 +71,15 @@ func (cmd *Command) Run() error {
 
 func (cmd *Command) validate() error {
 	if cmd.name == "" {
-		return fmt.Errorf("invalid flag: --%s is required", flagName)
+		return uerrors.NewFlagValidationError(flagName, "is required")
 	}
-	if _, err := os.Stat(cmd.name); err == nil {
-		return fmt.Errorf("invalid flag: --%s (%s) already exists", flagName, cmd.name)
+
+	if _, err := os.Stat(cmd.name); err != nil {
+		if os.IsNotExist(err) {
+			return uerrors.NewFlagValidationError(flagName, fmt.Sprintf("(%s) directory not found", cmd.name))
+		} else {
+			return err
+		}
 	}
 	return nil
 }
