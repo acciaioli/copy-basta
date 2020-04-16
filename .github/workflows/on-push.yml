@@ -14,10 +14,8 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Linter Install
-        run: go get -u golangci-lint
-#      - name: Lint
-#        run: make lint
+      - name: Lint
+        uses: actions-contrib/golangci-lint@v1
 #      - name: Test
 #        run: make test
 #      - name: Run Demo
