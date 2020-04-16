@@ -2,12 +2,6 @@ package common
 
 import "os"
 
-const (
-	IgnoreFile        = ".bastaignore"
-	SpecFile          = "spec.yaml"
-	TemplateExtension = ".basta"
-)
-
 type CommandFlag struct {
 	Ref     *string
 	Name    string

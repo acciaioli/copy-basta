@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/initialize/bootstrap"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
@@ -44,31 +46,32 @@ func (cmd *Command) Flags() []common.CommandFlag {
 	}
 }
 
-func (cmd *Command) Run(logger *common.Logger) error {
-	logger.DebugWithData("user input", common.LoggerData{
+func (cmd *Command) Run() error {
+	log.L.DebugWithData("user input", log.Data{
 		flagName: cmd.name,
 	})
-	logger.Info("validating user input")
+	log.L.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	logger.InfoWithData("bootstrapping new template project", common.LoggerData{"filepath": cmd.name})
+	log.L.InfoWithData("bootstrapping new template project", log.Data{"location": cmd.name})
 	err := bootstrap.Bootstrap(cmd.name)
 	if err != nil {
 		return err
 	}
 
-	logger.Info("done")
+	log.L.Info("done")
 	return nil
 }
 
 func (cmd *Command) validate() error {
 	if cmd.name == "" {
-		return fmt.Errorf(`[ERROR] "%s" is required`, flagName)
+		return common.NewFlagValidationError(flagName, "is required")
 	}
+
 	if _, err := os.Stat(cmd.name); err == nil {
-		return fmt.Errorf(`[ERROR] "%s" (%s) already exists`, flagName, cmd.name)
+		return common.NewFlagValidationError(flagName, fmt.Sprintf("(%s) directory already exists", cmd.name))
 	}
 	return nil
 }

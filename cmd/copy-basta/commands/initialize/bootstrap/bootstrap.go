@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
 )
 
@@ -56,6 +58,7 @@ func bootstrap(destDir string) error {
 
 func cleanup(destDir string) {
 	if err := os.RemoveAll(destDir); err != nil {
+		log.L.DebugWithData("external error", log.Data{"error": err.Error()})
 	}
 }
 

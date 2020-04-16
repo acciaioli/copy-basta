@@ -2,6 +2,7 @@ package specification
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/common"
+	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
 )
 
 type Spec struct {
@@ -20,7 +22,7 @@ type Spec struct {
 func (spec *Spec) validate() error {
 	for _, v := range spec.Variables {
 		if err := v.validate(); err != nil {
-			return err
+			return fmt.Errorf("variables error: %s", err.Error())
 		}
 	}
 
@@ -38,11 +40,12 @@ func New(specsYAML string) (*Spec, error) {
 func newFromReader(r io.Reader) (*Spec, error) {
 	spec := Spec{}
 	if err := yaml.NewDecoder(r).Decode(&spec); err != nil {
-		return nil, err
+		log.L.DebugWithData("external error", log.Data{"error": err.Error()})
+		return nil, errors.New("specification yaml file error: failed to decode yaml")
 	}
 
 	if err := spec.validate(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("specification yaml file error: %s", err.Error())
 	}
 	return &spec, nil
 }

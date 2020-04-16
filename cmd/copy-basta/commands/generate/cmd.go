@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/specification"
 
 	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/parse"
@@ -16,15 +18,18 @@ const (
 	commandID          = "generate"
 	commandDescription = "generates new project based on the template and provided parameters"
 
-	flagSrc         = "src"
-	flagDest        = "dest"
-	flagSpec        = "spec"
-	flagInput       = "input"
-	flagDefaultSpec = common.SpecFile
-	flagUsageSrc    = "Generated Project root directory"
-	flagUsageDest   = "Specification YAML file, relative to the template root directory"
-	flagUsageSpec   = "Path to the YAML containing the template specification"
-	flagUsageInput  = "Path to the YAML file with the variables to use in the templates"
+	flagSrc            = "src"
+	flagDescriptionSrc = "Generated Project root directory"
+
+	flagDest            = "dest"
+	flagDescriptionDest = "Specification YAML file, relative to the template root directory"
+
+	flagSpec            = "spec"
+	flagDefaultSpec     = common.SpecFile
+	flagDescriptionSpec = "Path to the YAML containing the template specification"
+
+	flagInput            = "input"
+	flagDescriptionInput = "Path to the YAML file with the variables to use in the templates"
 )
 
 type Command struct {
@@ -52,68 +57,68 @@ func (cmd *Command) Flags() []common.CommandFlag {
 			Ref:     &cmd.src,
 			Name:    flagSrc,
 			Default: nil,
-			Usage:   flagUsageSrc,
+			Usage:   flagDescriptionSrc,
 		},
 		{
 			Ref:     &cmd.dest,
 			Name:    flagDest,
 			Default: nil,
-			Usage:   flagUsageDest,
+			Usage:   flagDescriptionDest,
 		},
 		{
 			Ref:     &cmd.specYAML,
 			Name:    flagSpec,
 			Default: sToP(flagDefaultSpec),
-			Usage:   flagUsageSpec,
+			Usage:   flagDescriptionSpec,
 		},
 		{
 			Ref:     &cmd.inputYAML,
 			Name:    flagInput,
 			Default: nil,
-			Usage:   flagUsageInput,
+			Usage:   flagDescriptionInput,
 		},
 	}
 }
 
-func (cmd *Command) Run(logger *common.Logger) error {
-	logger.DebugWithData("user input", common.LoggerData{
+func (cmd *Command) Run() error {
+	log.L.DebugWithData("user input", log.Data{
 		flagSrc:   cmd.src,
 		flagDest:  cmd.dest,
 		flagSpec:  cmd.specYAML,
 		flagInput: cmd.inputYAML,
 	})
-	logger.Info("validating user input")
+	log.L.Info("validating user input")
 	if err := cmd.validate(); err != nil {
 		return err
 	}
 
-	logger.Info("loading specification file")
+	log.L.Info("loading specification file")
 	spec, err := specification.New(cmd.specFullPath())
 	if err != nil {
 		return err
 	}
 
-	logger.Info("parsing template files")
+	log.L.Info("parsing template files")
 	files, err := parse.Parse(cmd.src)
 	if err != nil {
 		return err
 	}
-	fdata := common.LoggerData{}
+	fdata := log.Data{}
 	for _, f := range files {
 		fdata[f.Path] = fmt.Sprintf("mode=%v, is-template=%T, byte-counts=%d", f.Mode, f.Template, len(f.Content))
 	}
-	logger.DebugWithData("parsed files", fdata)
+	log.L.DebugWithData("parsed files", fdata)
 
 	var input common.InputVariables
 	if cmd.inputYAML != "" {
-		logger.InfoWithData("loading template variables from file", common.LoggerData{"filepath": cmd.inputYAML})
+		log.L.InfoWithData("loading template variables from file", log.Data{"location": cmd.inputYAML})
 		fileInput, err := spec.InputFromFile(cmd.inputYAML)
 		if err != nil {
 			return err
 		}
 		input = fileInput
 	} else {
-		logger.Info("getting template variables dynamically")
+		log.L.Info("getting template variables dynamically")
 		stdinInput, err := spec.InputFromStdIn()
 		if err != nil {
 			return err
@@ -121,13 +126,13 @@ func (cmd *Command) Run(logger *common.Logger) error {
 		input = stdinInput
 	}
 
-	logger.Info("creating new project")
+	log.L.InfoWithData("creating new project", log.Data{"location": cmd.dest})
 	err = write.Write(cmd.dest, files, input)
 	if err != nil {
 		return err
 	}
 
-	logger.Info("done")
+	log.L.Info("done")
 	return nil
 }
 
@@ -137,26 +142,33 @@ func (cmd *Command) specFullPath() string {
 
 func (cmd *Command) validate() error {
 	if cmd.src == "" {
-		return fmt.Errorf(`[ERROR] "%s" is required`, flagSrc)
+		return common.NewFlagValidationError(flagSrc, "is required")
+	}
+	if _, err := os.Stat(cmd.src); err != nil {
+		if os.IsNotExist(err) {
+			return common.NewFlagValidationError(flagSrc, fmt.Sprintf("(%s) directory not found", cmd.src))
+		} else {
+			return err
+		}
 	}
 
 	if cmd.dest == "" {
-		return fmt.Errorf(`[ERROR] "%s" is required`, flagDest)
+		return common.NewFlagValidationError(flagDest, "is required")
 	}
 	if _, err := os.Stat(cmd.dest); err == nil {
-		return fmt.Errorf(`[ERROR] "%s" (%s) already exists`, flagDest, cmd.dest)
+		return common.NewFlagValidationError(flagDest, fmt.Sprintf("(%s) directory already exists", cmd.dest))
 	}
 
 	if cmd.specYAML == "" {
-		return fmt.Errorf(`[ERROR] "%s" is required`, flagSpec)
+		return common.NewFlagValidationError(flagSpec, "is required")
 	}
-	spec := cmd.specFullPath()
-	if err := fileExistsOrErr(spec, flagSpec); err != nil {
+	specYAML := cmd.specFullPath()
+	if err := fileExists(flagSpec, specYAML); err != nil {
 		return err
 	}
 
 	if cmd.inputYAML != "" {
-		if err := fileExistsOrErr(cmd.inputYAML, flagInput); err != nil {
+		if err := fileExists(flagInput, cmd.inputYAML); err != nil {
 			return err
 		}
 	}
@@ -164,13 +176,13 @@ func (cmd *Command) validate() error {
 	return nil
 }
 
-func fileExistsOrErr(filePath string, name string) error {
+func fileExists(flagName string, filePath string) error {
 	fInfo, err := os.Stat(filePath)
 	if err != nil {
-		return fmt.Errorf(`[ERROR] "%s" (%s) not found`, name, filePath)
+		return common.NewFlagValidationError(flagName, fmt.Sprintf("(%s) file not found", filePath))
 	}
 	if fInfo.IsDir() {
-		return fmt.Errorf(`[ERROR] "%s" (%s) is not a file`, name, filePath)
+		return common.NewFlagValidationError(flagName, fmt.Sprintf("(%s) is not a file", filePath))
 	}
 	return nil
 }
