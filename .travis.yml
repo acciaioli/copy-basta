@@ -22,7 +22,6 @@ script:
   - make lint
   - make test
 
-
 before_deploy:
   - go build ./cmd/copy-basta
 
@@ -36,8 +35,8 @@ deploy:
   file:
   - ./copy-basta
   skip_cleanup: true
-  name: v$TRAVIS_TAG
-  body: "This is the body"
+  name: $TRAVIS_TAG
+  body: "This doesnt work and I am tired"
   draft: true
   prerelease: false
   on:
