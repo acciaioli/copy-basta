@@ -28,7 +28,7 @@ before_deploy:
 
 deploy:
   provider: releases
-  api_key: $AUTH_TOKEN
+  api_key: $GITHUB_PERSONAL_ACCESS_TOKEN
   file: copy-basta
   skip_cleanup: true
   draft: true
