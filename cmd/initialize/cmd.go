@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/common/log"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/commands/initialize/bootstrap"
+	"copy-basta/cmd/initialize/bootstrap"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/common"
 )
 
 const (

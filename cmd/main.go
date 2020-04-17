@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/common/log"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate"
-	"github.com/spin14/copy-basta/cmd/copy-basta/commands/initialize"
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
+	"github.com/spf13/cobra"
+
+	"copy-basta/cmd/common"
+	"copy-basta/cmd/generate"
+	"copy-basta/cmd/initialize"
 )
 
 const (

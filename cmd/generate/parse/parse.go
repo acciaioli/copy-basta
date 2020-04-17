@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/common"
 )
 
 func Parse(root string) ([]common.File, error) {

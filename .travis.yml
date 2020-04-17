@@ -21,9 +21,10 @@ before_script:
 script:
   - make lint
   - make test
+  - make
 
 before_deploy:
-  - go build ./cmd/copy-basta
+  - make build
 
 # GITHUB_PERSONAL_ACCESS_TOKEN
 # 1) go to https://github.com/settings/tokens
@@ -32,8 +33,8 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_PERSONAL_ACCESS_TOKEN
-  file:
-  - ./copy-basta
+  file_glob: true
+  file: bin/*
   skip_cleanup: true
   name: $TRAVIS_TAG
   body: "This doesnt work and I am tired"

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/common/log"
 )
 
 func main() {

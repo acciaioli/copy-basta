@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/common"
 
 	"github.com/stretchr/testify/require"
 )

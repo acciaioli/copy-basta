@@ -1,5 +1,5 @@
 ---
-goModule: "github.com/spin14/copy-basta-example"
+goModule: "copy-basta-example"
 goVersion: "1.14"
 name: "Joao Valverde"
 age: 29
