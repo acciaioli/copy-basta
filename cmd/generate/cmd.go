@@ -5,13 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/common/log"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/specification"
+	"copy-basta/cmd/generate/specification"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/parse"
-	"github.com/spin14/copy-basta/cmd/copy-basta/commands/generate/write"
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/common"
+	"copy-basta/cmd/generate/parse"
+	"copy-basta/cmd/generate/write"
 )
 
 const (

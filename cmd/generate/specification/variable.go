@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/common/log"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/common"
 )
 
 /*

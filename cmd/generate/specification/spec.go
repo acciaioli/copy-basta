@@ -11,8 +11,8 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
-	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/common"
+	"copy-basta/cmd/common/log"
 )
 
 type Spec struct {

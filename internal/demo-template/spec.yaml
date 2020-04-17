@@ -3,7 +3,7 @@ variables:
   - name: goModule
     type: string
     description: go module name (https://github.com/golang/go/wiki/Modules)
-    default: github.com/spin14/copy-basta-example
+    default: copy-basta-example
   - name: goVersion
     type: string
     description: go module version (https://github.com/golang/go/wiki/Modules)

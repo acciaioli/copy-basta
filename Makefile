@@ -1,9 +1,11 @@
-.PHONY: default fix lint test install demo
+.PHONY: default fix lint test install build demo-generate demo-init demo-logs
+
+# --- dev --- #
 
 default: fix lint test
 
 fix:
-	@ echo ">> fixing"
+	@ echo ">> fixing source code"
 	@ gofmt -l -w .
 	@ go mod tidy
 	@ echo ">> done"
@@ -27,14 +29,22 @@ cover:
 
 install:
 	@ echo ">> installing cli"
-	@ go install ./cmd/copy-basta
+	@ go install ./cmd
 	@ echo ">> done"
+
+# --- release --- #
+
+build:
+	@ echo ">> building cli binaries"
+	@ ./build.sh
+	@ echo ">> done"
+
+# --- demo --- #
 
 demo-generate: install
 	@ echo ">> running demo generate command"
 	@ cd ./internal; make run
 	@ echo ">> done"
-
 
 tmpl = ./.tmp/
 gen = ./generated
@@ -53,3 +63,4 @@ demo-logs: install
 	@ echo ">> running logging demo"
 	@ cd internal/demo-log; go run main.go
 	@ echo ">> done"
+

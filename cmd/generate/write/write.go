@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/common/log"
 
-	"github.com/spin14/copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/common"
 )
 
 func Write(destDir string, files []common.File, input common.InputVariables) error {

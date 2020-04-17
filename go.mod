@@ -1,4 +1,4 @@
-module github.com/spin14/copy-basta
+module copy-basta
 
 go 1.13
 
