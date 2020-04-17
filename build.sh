@@ -8,11 +8,11 @@ declare -a GOARCH=("386" "amd64")
 
 for goos in "${GOOS[@]}"; do
   for goarch in "${GOARCH[@]}"; do
-    bin="bin/$goos-$goarch"
+    bin="bin/copy-basta.$goos-$goarch"
     if [[ "$bin" == *"windows"* ]]; then
       bin="$bin.exe"
     fi
-    cmd="go build -o $bin ./cmd/"
+    cmd="GOOS=$goos GOARCH=$goarch go build -a -o $bin ./cmd/"
     echo "$cmd"
     eval "$cmd"
   done
