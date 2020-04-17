@@ -30,16 +30,16 @@ before_deploy:
 # 1) go to https://github.com/settings/tokens
 # 2) generate token with `repo` scopes
 # 3) add key to travis env variables
-#deploy:
-#  provider: releases
-#  api_key: $GITHUB_PERSONAL_ACCESS_TOKEN
-#  file_glob: true
-#  file: bin/*
-#  skip_cleanup: true
-#  name: $TRAVIS_TAG
-#  body: "This doesnt work and I am tired"
-#  draft: true
-#  prerelease: false
-#  on:
-#    tags: true
-#    condition: $TRAVIS_GO_VERSION =~ ^1\.14
+deploy:
+  provider: releases
+  api_key: $GITHUB_PERSONAL_ACCESS_TOKEN
+  file_glob: true
+  file: bin/*
+  skip_cleanup: true
+  name: $TRAVIS_TAG
+  body: "This doesnt work and I am tired"
+  draft: true
+  prerelease: false
+  on:
+    tags: true
+    condition: $TRAVIS_GO_VERSION =~ ^1\.14
