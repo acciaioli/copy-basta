@@ -12,9 +12,9 @@ import (
 	"copy-basta/cmd/initialize"
 )
 
-const (
-	version = "snapshot" // build-time variable
+var version = "snapshot" // build-time variable
 
+const (
 	cmdUse   = "copy-basta"
 	cmdShort = "copy-basta utility"
 	cmdLong  = "Basta! Stop copying.\n\nThis CLI can be used to bootstrap go projects in seconds, and stop the copy paste madness"

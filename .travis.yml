@@ -24,7 +24,7 @@ script:
   - make
 
 before_deploy:
-  - make build
+  - VERSION=$TRAVIS_TAG make build
 
 # GITHUB_PERSONAL_ACCESS_TOKEN
 # 1) go to https://github.com/settings/tokens
