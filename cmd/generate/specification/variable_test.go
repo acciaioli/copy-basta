@@ -14,37 +14,37 @@ func Test_SpecVariable_valueOK(t *testing.T) {
 	}{
 		{
 			name:    "string to string",
-			specVar: SpecVariable{Type: openAPiString},
+			specVar: SpecVariable{Type: openAPIString},
 			value:   "a string",
 		},
 		{
 			name:    "int to number",
-			specVar: SpecVariable{Type: openAPiNumber},
+			specVar: SpecVariable{Type: openAPINumber},
 			value:   10,
 		},
 		{
 			name:    "float to number",
-			specVar: SpecVariable{Type: openAPiNumber},
+			specVar: SpecVariable{Type: openAPINumber},
 			value:   10.2,
 		},
 		{
 			name:    "int to integer",
-			specVar: SpecVariable{Type: openAPiInteger},
+			specVar: SpecVariable{Type: openAPIInteger},
 			value:   11,
 		},
 		{
 			name:    "bool to boolean",
-			specVar: SpecVariable{Type: openAPiBoolean},
+			specVar: SpecVariable{Type: openAPIBoolean},
 			value:   true,
 		},
 		{
 			name:    "slice to array",
-			specVar: SpecVariable{Type: openAPiArray},
+			specVar: SpecVariable{Type: openAPIArray},
 			value:   []interface{}{"hello", 12},
 		},
 		{
 			name:    "map to object",
-			specVar: SpecVariable{Type: openAPiObject},
+			specVar: SpecVariable{Type: openAPIObject},
 			value:   map[string]interface{}{"string": "value", "integer": 13},
 		},
 	}
@@ -65,37 +65,37 @@ func Test_SpecVariable_valueOK_error(t *testing.T) {
 	}{
 		{
 			name:    "int to string",
-			specVar: SpecVariable{Type: openAPiString},
+			specVar: SpecVariable{Type: openAPIString},
 			value:   4,
 		},
 		{
 			name:    "string to number",
-			specVar: SpecVariable{Type: openAPiNumber},
+			specVar: SpecVariable{Type: openAPINumber},
 			value:   "not a number",
 		},
 		{
 			name:    "bool to integer",
-			specVar: SpecVariable{Type: openAPiInteger},
+			specVar: SpecVariable{Type: openAPIInteger},
 			value:   false,
 		},
 		{
 			name:    "float to boolean",
-			specVar: SpecVariable{Type: openAPiBoolean},
+			specVar: SpecVariable{Type: openAPIBoolean},
 			value:   9.3,
 		},
 		{
 			name:    "map to array",
-			specVar: SpecVariable{Type: openAPiArray},
+			specVar: SpecVariable{Type: openAPIArray},
 			value:   map[string]interface{}{"bool": true},
 		},
 		{
 			name:    "map to object",
-			specVar: SpecVariable{Type: openAPiObject},
+			specVar: SpecVariable{Type: openAPIObject},
 			value:   []interface{}{"bye", 934},
 		},
 		{
 			name:    "unknown type",
-			specVar: SpecVariable{Type: openAPiType("unknown")},
+			specVar: SpecVariable{Type: openAPIType("unknown")},
 			value:   "",
 		},
 	}
@@ -117,7 +117,7 @@ func Test_SpecVariable_validate(t *testing.T) {
 			name: "simple",
 			specVar: SpecVariable{
 				Name:        "simple",
-				Type:        openAPiString,
+				Type:        openAPIString,
 				Default:     nil,
 				Description: nil,
 			},
@@ -126,7 +126,7 @@ func Test_SpecVariable_validate(t *testing.T) {
 			name: "complete",
 			specVar: SpecVariable{
 				Name:        "complete",
-				Type:        openAPiInteger,
+				Type:        openAPIInteger,
 				Default:     2289,
 				Description: func() *string { s := "a legit integer"; return &s }(),
 			},
@@ -149,7 +149,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 		{
 			name: "missing name",
 			specVar: SpecVariable{
-				Type:        openAPiBoolean,
+				Type:        openAPIBoolean,
 				Default:     nil,
 				Description: nil,
 			},
@@ -167,7 +167,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 			name: "invalid type",
 			specVar: SpecVariable{
 				Name:        "myName",
-				Type:        openAPiType("notValid"),
+				Type:        openAPIType("notValid"),
 				Default:     nil,
 				Description: nil,
 			},
@@ -176,7 +176,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 			name: "invalid default",
 			specVar: SpecVariable{
 				Name:        "myName",
-				Type:        openAPiBoolean,
+				Type:        openAPIBoolean,
 				Default:     44,
 				Description: func() *string { s := "a boolean, therefore not a integer"; return &s }(),
 			},
@@ -259,37 +259,37 @@ func Test_SpecVariable_process(t *testing.T) {
 	}{
 		{
 			name:          "string",
-			specVar:       SpecVariable{Type: openAPiString},
+			specVar:       SpecVariable{Type: openAPIString},
 			text:          "a string",
 			expectedValue: "a string",
 		},
 		{
 			name:          "number",
-			specVar:       SpecVariable{Type: openAPiNumber},
+			specVar:       SpecVariable{Type: openAPINumber},
 			text:          "42.1",
 			expectedValue: 42.1,
 		},
 		{
 			name:          "integer",
-			specVar:       SpecVariable{Type: openAPiInteger},
+			specVar:       SpecVariable{Type: openAPIInteger},
 			text:          "73",
 			expectedValue: 73,
 		},
 		{
 			name:          "boolean",
-			specVar:       SpecVariable{Type: openAPiBoolean},
+			specVar:       SpecVariable{Type: openAPIBoolean},
 			text:          "true",
 			expectedValue: true,
 		},
 		{
 			name:          "slice",
-			specVar:       SpecVariable{Type: openAPiArray},
+			specVar:       SpecVariable{Type: openAPIArray},
 			text:          "eleven,12",
 			expectedValue: []string{"eleven", "12"},
 		},
 		{
 			name:          "map",
-			specVar:       SpecVariable{Type: openAPiObject},
+			specVar:       SpecVariable{Type: openAPIObject},
 			text:          "key1=value1,key2=22,key3=false",
 			expectedValue: map[string]string{"key1": "value1", "key2": "22", "key3": "false"},
 		},

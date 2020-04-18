@@ -17,7 +17,9 @@ var version = "snapshot" // build-time variable
 const (
 	cmdUse   = "copy-basta"
 	cmdShort = "copy-basta utility"
-	cmdLong  = "Basta! Stop copying.\n\nThis CLI can be used to bootstrap go projects in seconds, and stop the copy paste madness"
+	cmdLong  = `Basta! Stop copying.
+
+This CLI can be used to bootstrap go projects in seconds, and stop the copy paste madness`
 
 	flagLogLevel            = "log-level"
 	flagLogLevelDefault     = "info"

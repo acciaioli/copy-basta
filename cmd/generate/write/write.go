@@ -6,9 +6,8 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"copy-basta/cmd/common/log"
-
 	"copy-basta/cmd/common"
+	"copy-basta/cmd/common/log"
 )
 
 func Write(destDir string, files []common.File, input common.InputVariables) error {

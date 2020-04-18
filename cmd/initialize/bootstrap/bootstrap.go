@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -19,41 +18,44 @@ func Bootstrap(destDir string) error {
 }
 
 func bootstrap(destDir string) error {
-	if err := os.Mkdir(destDir, os.ModePerm); err != nil {
+	err := os.Mkdir(destDir, os.ModePerm)
+	if err != nil {
 		return err
 	}
 
-	ignorePath := filepath.Join(destDir, common.IgnoreFile)
-	if f, err := os.Create(ignorePath); err != nil {
+	_, err = bootstrapFile(destDir, common.IgnoreFile, ignoreText)
+	if err != nil {
 		return err
-	} else {
-		if _, err := f.WriteString(ignoreText); err != nil {
-			return err
-		}
 	}
 
-	specPath := filepath.Join(destDir, common.SpecFile)
-	if f, err := os.Create(specPath); err != nil {
+	_, err = bootstrapFile(destDir, common.SpecFile, specText)
+	if err != nil {
 		return err
-	} else {
-		if _, err := f.WriteString(specText); err != nil {
-			return err
-		}
 	}
 
-	scriptPath := filepath.Join(destDir, fmt.Sprintf("%s%s", scriptFileName, common.TemplateExtension))
-	if f, err := os.Create(scriptPath); err != nil {
+	scriptFile, err := bootstrapFile(destDir, scriptFileName, scriptText)
+	if err != nil {
 		return err
-	} else {
-		if _, err := f.WriteString(scriptText); err != nil {
-			return err
-		}
-		if err := f.Chmod(scriptFileChmodCode); err != nil {
-			return err
-		}
+	}
+	err = scriptFile.Chmod(scriptFileChmodCode)
+	if err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func bootstrapFile(destDir, filName, fileText string) (*os.File, error) {
+	p := filepath.Join(destDir, filName)
+	f, err := os.Create(p)
+	if err != nil {
+		return nil, err
+	}
+	_, err = f.WriteString(fileText)
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
 }
 
 func cleanup(destDir string) {
