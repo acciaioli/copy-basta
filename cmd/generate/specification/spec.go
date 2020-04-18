@@ -30,11 +30,11 @@ func (spec *Spec) validate() error {
 }
 
 func New(specsYAML string) (*Spec, error) {
-	if f, err := os.Open(specsYAML); err != nil {
+	f, err := os.Open(specsYAML)
+	if err != nil {
 		return nil, err
-	} else {
-		return newFromReader(f)
 	}
+	return newFromReader(f)
 }
 
 func newFromReader(r io.Reader) (*Spec, error) {
@@ -69,12 +69,10 @@ func (spec *Spec) InputFromFile(inputYAML string) (common.InputVariables, error)
 				return nil, fmt.Errorf("no value nor default for %s", v.Name)
 			}
 			input[v.Name] = v.Default
-		} else {
-			if err := v.valueOk(value); err != nil {
-				return nil, err
-			}
 		}
-
+		if err := v.valueOk(value); err != nil {
+			return nil, err
+		}
 	}
 
 	return input, nil

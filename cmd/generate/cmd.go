@@ -147,9 +147,8 @@ func (cmd *Command) validate() error {
 	if _, err := os.Stat(cmd.src); err != nil {
 		if os.IsNotExist(err) {
 			return common.NewFlagValidationError(flagSrc, fmt.Sprintf("(%s) directory not found", cmd.src))
-		} else {
-			return err
 		}
+		return err
 	}
 
 	if cmd.dest == "" {

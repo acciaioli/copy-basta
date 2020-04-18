@@ -75,10 +75,20 @@ func processFile(filepath string, info os.FileInfo) (*common.File, error) {
 	}
 
 	if path.Ext(filepath) == common.TemplateExtension {
-		return &common.File{Path: trimRootDir(trimExtension(filepath)), Mode: info.Mode(), Template: true, Content: content}, nil
+		return &common.File{
+			Path:     trimRootDir(trimExtension(filepath)),
+			Mode:     info.Mode(),
+			Template: true,
+			Content:  content,
+		}, nil
 	}
 
-	return &common.File{Path: trimRootDir(filepath), Mode: info.Mode(), Template: false, Content: content}, nil
+	return &common.File{
+		Path:     trimRootDir(filepath),
+		Mode:     info.Mode(),
+		Template: false,
+		Content:  content,
+	}, nil
 }
 
 func trimExtension(s string) string {

@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.com/Spin14/copy-basta.svg?branch=master)](https://travis-ci.com/Spin14/copy-basta)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Spin14/copy-basta)](https://goreportcard.com/report/github.com/Spin14/copy-basta)
+
 ```
 Basta! Stop copying.
 
@@ -24,10 +25,9 @@ Flags:
 Use "copy-basta [command] --help" for more information about a command.
 ```
 
-## Example 
+## Install
 
-The following command generates a new go project from a template, compiles it and runs it. 
+### Binary Releases
 
-```bash
-$ make demo
-```
+For Linux, Mac and Windows binary releases are [available here](https://github.com/acciaioli/copy-basta/releases).
+

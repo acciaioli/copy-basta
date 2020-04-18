@@ -18,20 +18,20 @@ Spec variables use a subset of the OpenApi data models
 https://swagger.io/docs/specification/data-models
 */
 
-type openAPiType string
+type openAPIType string
 
 const (
-	openAPiString  = openAPiType("string")
-	openAPiNumber  = openAPiType("number")
-	openAPiInteger = openAPiType("integer")
-	openAPiBoolean = openAPiType("boolean")
-	openAPiArray   = openAPiType("array")
-	openAPiObject  = openAPiType("object")
+	openAPIString  = openAPIType("string")
+	openAPINumber  = openAPIType("number")
+	openAPIInteger = openAPIType("integer")
+	openAPIBoolean = openAPIType("boolean")
+	openAPIArray   = openAPIType("array")
+	openAPIObject  = openAPIType("object")
 )
 
 type SpecVariable struct {
 	Name        string      `yaml:"name"`
-	Type        openAPiType `yaml:"type"`
+	Type        openAPIType `yaml:"type"`
 	Default     interface{} `yaml:"default"`
 	Description *string     `yaml:"description"`
 }
@@ -46,8 +46,10 @@ func (v *SpecVariable) validate() error {
 	if v.Type == "" {
 		return errors.New("variable error [type]: is required")
 	}
-	if ok := func(t openAPiType) bool {
-		for _, t := range []openAPiType{openAPiString, openAPiNumber, openAPiInteger, openAPiBoolean, openAPiArray, openAPiObject} {
+	if ok := func(t openAPIType) bool {
+		for _, t := range []openAPIType{
+			openAPIString, openAPINumber, openAPIInteger, openAPIBoolean, openAPIArray, openAPIObject,
+		} {
 			if v.Type == t {
 				return true
 			}
@@ -77,23 +79,24 @@ func (v *SpecVariable) valueOk(value interface{}) error {
 				return nil
 			}
 		}
-		return fmt.Errorf("value error: decoded to type %v, expected one of %v. variable type is %s", actual, accepted, string(v.Type))
+		format := "value error: decoded to type %v, expected one of %v. variable type is %s"
+		return fmt.Errorf(format, actual, accepted, string(v.Type))
 	}
 
 	var acceptedKinds []reflect.Kind
 
 	switch v.Type {
-	case openAPiString:
+	case openAPIString:
 		acceptedKinds = []reflect.Kind{reflect.String}
-	case openAPiNumber:
+	case openAPINumber:
 		acceptedKinds = []reflect.Kind{reflect.Int, reflect.Float64}
-	case openAPiInteger:
+	case openAPIInteger:
 		acceptedKinds = []reflect.Kind{reflect.Int}
-	case openAPiBoolean:
+	case openAPIBoolean:
 		acceptedKinds = []reflect.Kind{reflect.Bool}
-	case openAPiArray:
+	case openAPIArray:
 		acceptedKinds = []reflect.Kind{reflect.Slice}
-	case openAPiObject:
+	case openAPIObject:
 		acceptedKinds = []reflect.Kind{reflect.Map}
 	default:
 		log.L.DebugWithData("default case should not run", log.Data{"type": v.Type, "value": value})
@@ -111,7 +114,9 @@ func (v *SpecVariable) prompt() string {
 	coloredType := common.ColoredFormat(common.ColorCyan, common.TextFormatBold, common.BGColorNone, string(v.Type))
 
 	if v.Description != nil {
-		coloredDescription := common.ColoredFormat(common.ColorGreen, common.TextFormatNormal, common.BGColorNone, *v.Description)
+		coloredDescription := common.ColoredFormat(
+			common.ColorGreen, common.TextFormatNormal, common.BGColorNone, *v.Description,
+		)
 		sBuilder.WriteString(fmt.Sprintf("%s [%s] ", coloredDescription, coloredType))
 	} else {
 		sBuilder.WriteString(fmt.Sprintf("[%s]", coloredType))
@@ -120,7 +125,9 @@ func (v *SpecVariable) prompt() string {
 	sBuilder.WriteString("\n")
 
 	if v.Default != nil {
-		coloredDefault := common.ColoredFormat(common.ColorOrange, common.TextFormatNormal, common.BGColorNone, fmt.Sprintf("%v", v.Default))
+		coloredDefault := common.ColoredFormat(
+			common.ColorOrange, common.TextFormatNormal, common.BGColorNone, fmt.Sprintf("%v", v.Default),
+		)
 		sBuilder.WriteString(fmt.Sprintf("%s %s [%v]    ", qMark, coloredName, coloredDefault))
 	} else {
 		sBuilder.WriteString(fmt.Sprintf("%s %s    ", qMark, coloredName))
@@ -134,17 +141,17 @@ func (v *SpecVariable) process(s string) (interface{}, error) {
 	var err error
 
 	switch v.Type {
-	case openAPiString:
+	case openAPIString:
 		value = s
-	case openAPiNumber:
+	case openAPINumber:
 		value, err = strconv.ParseFloat(s, 64)
-	case openAPiInteger:
+	case openAPIInteger:
 		value, err = strconv.Atoi(s)
-	case openAPiBoolean:
+	case openAPIBoolean:
 		value, err = strconv.ParseBool(s)
-	case openAPiArray:
+	case openAPIArray:
 		value = strings.Split(s, ",")
-	case openAPiObject:
+	case openAPIObject:
 		valueMap := map[string]string{}
 		for _, kvS := range strings.Split(s, ",") {
 			kv := strings.SplitN(kvS, "=", 2)
