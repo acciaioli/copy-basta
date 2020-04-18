@@ -12,7 +12,7 @@ for goos in "${GOOS[@]}"; do
     if [[ "$bin" == *"windows"* ]]; then
       bin="$bin.exe"
     fi
-    cmd="GOOS=$goos GOARCH=$goarch go build -ldflags \"-X main.version=$VERSION\" -a -o $bin ./cmd/"
+    cmd="GOOS=$goos GOARCH=$goarch go build -ldflags \"-X main.version=$VERSION\" -a -o $bin ./cmd/copy-basta"
     echo "$cmd"
     eval "$cmd"
   done
