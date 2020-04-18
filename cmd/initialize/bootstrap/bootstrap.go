@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -28,12 +29,17 @@ func bootstrap(destDir string) error {
 		return err
 	}
 
+	_, err = bootstrapFile(destDir, readmeFileName, readmeText)
+	if err != nil {
+		return err
+	}
+
 	_, err = bootstrapFile(destDir, common.SpecFile, specText)
 	if err != nil {
 		return err
 	}
 
-	scriptFile, err := bootstrapFile(destDir, scriptFileName, scriptText)
+	scriptFile, err := bootstrapFile(destDir, fmt.Sprintf("%s%s", scriptFileName, common.TemplateExtension), scriptText)
 	if err != nil {
 		return err
 	}
@@ -70,7 +76,22 @@ const (
 .git/
 
 # ignored patterns
-ignore-me.md
+readme.md
+.bastaignore
+`
+	readmeFileName = "readme.md"
+	readmeText     = `# template
+
+This is the readme of the template. 
+
+It will not be copied because it is featured in the .bastaignore file.
+
+To generate a project from this template you should run:
+*copy-basta generate --src=template-dir --src=new-project*
+
+*--src* should be the directory containing this file
+
+You should override this file with information that is relevant for your template!
 `
 	specText = `---
 variables:

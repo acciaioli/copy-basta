@@ -27,9 +27,11 @@ cover:
 	@ go tool cover --html=cover.out
 	@ echo ">> done"
 
+version=snapshot-$(shell git rev-parse --short HEAD)
+
 install:
-	@ echo ">> installing cli"
-	@ go install ./cmd
+	@ echo ">> installing cli (dev)"
+	@ go install -ldflags "-X main.version=$(version)" ./cmd/copy-basta
 	@ echo ">> done"
 
 # --- release --- #
