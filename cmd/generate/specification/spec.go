@@ -80,7 +80,7 @@ func (spec *Spec) InputFromFile(inputYAML string) (common.InputVariables, error)
 
 func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
 	r := bufio.NewReader(os.Stdin)
-
+	fmt.Print("\n")
 	inputVars := common.InputVariables{}
 	for _, v := range spec.Variables {
 		userInput, err := promptLoop(r, v)
@@ -102,7 +102,6 @@ func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
 }
 
 func promptLoop(r *bufio.Reader, v SpecVariable) (*string, error) {
-	fmt.Print("\n")
 	for {
 		fmt.Print(v.prompt())
 		userInput, err := r.ReadString('\n')
