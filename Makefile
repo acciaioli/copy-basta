@@ -27,7 +27,7 @@ cover:
 	@ go tool cover --html=cover.out
 	@ echo ">> done"
 
-version=snapshot-$(shell git rev-parse --short HEAD)
+version=snapshot-$(USER)-$(shell git rev-parse --short HEAD)
 
 install:
 	@ echo ">> installing cli (dev)"

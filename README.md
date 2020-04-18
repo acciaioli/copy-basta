@@ -3,9 +3,22 @@
 [![Build Status](https://travis-ci.com/Spin14/copy-basta.svg?branch=master)](https://travis-ci.com/Spin14/copy-basta)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Spin14/copy-basta)](https://goreportcard.com/report/github.com/Spin14/copy-basta)
 
+
+- [Intro](#intro)
+- [Install](#install)
+- [How to stop copy pasting](#how-to-stop-copy-pasting)
+- [Quick Start](#quick-start)
+- [RoadMap](#roadmap)
+
+
 ## Intro
 
-_todo_
+`copy-basta` is templating command line interface (cli) tool.
+It aims to support the usage of template code bases with well defined inputs and outputs.
+
+The cli is written in `go` and only (golang's text/template)[https://golang.org/pkg/text/template/] are supported.
+This doesn't mean that you need to know `go` to use this tool, it just means that you need to use golang's templating language
+in your template files.
 
 ```
 Basta! Stop copying.
@@ -35,13 +48,22 @@ Use "copy-basta [command] --help" for more information about a command.
 
 For Linux, Mac and Windows binary releases are [available here](https://github.com/acciaioli/copy-basta/releases).
 
-### Using go
+#### Using go (compile source code)
 
-_todo_
+```
+▶ git clone git@github.com:acciaioli/copy-basta.git
 
-### From source
+▶ cd copy-basta
 
-_todo_
+▶ make install
+>> installing cli (dev)
+>> done
+
+▶ copy-basta --version
+copy-basta version snapshot-user-4334710
+```
+
+This will run `go install` and the binary will be available from your go path
 
 ## How to stop copy pasting
 
@@ -85,7 +107,7 @@ Ex: `copy-basta generate --src=my-server-template --dest=x-service`.
 That is it all. You should have a new directory with your new project source code.
 
 
-## Get Started
+## Quick Start
 
 Once you have installed the cli tool:
 
@@ -110,8 +132,7 @@ my-template
 0 directories, 4 files
 ```
 
-The files in this directory [should look familiar](#What goes into the template project?)
- 
+The files in this directory [should look familiar](#what-goes-into-the-template-project)
 We can now generate a new project from this template.
 
 ```
@@ -151,10 +172,13 @@ Our new project is ready!
 hello Chi!
 ```
 
-## Features
-
-_todo_
-
 ## RoadMap
 
-_todo_
+- proper support for `array` and `object` types
+- dynamic directory and file names
+- generate from remote location (--src=https://github.com/acciaioli/example-template)
+- deal with variables with dashes (this needs to be forbidden or worked around, no good for go templates)
+- code documentation
+- cli documentation
+- heathcheck command (quickly tests the template, for a dev friendly experience)
+- support install via snap, apt, brew
