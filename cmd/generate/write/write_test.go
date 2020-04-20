@@ -1,9 +1,6 @@
 package write
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,46 +8,72 @@ import (
 	"copy-basta/cmd/common"
 )
 
-func Test_write(t *testing.T) {
-	root := "./test-generated"
+func Test_generateFromTemplate(t *testing.T) {
+	input := common.InputVariables{
+		"user":   "vasco",
+		"number": 22,
+	}
 
-	defer func() { _ = os.RemoveAll(root) }()
-
-	files := []common.File{
+	tests := []struct {
+		name               string
+		rawPath            string
+		rawContent         string
+		expectedGenPath    string
+		expectedGenContent string
+	}{
 		{
-			Path:     "simple.md",
-			Mode:     os.ModePerm,
-			Template: false,
-			Content:  []byte("# useless readme\n"),
+			name:               "template in path",
+			rawPath:            "dir/{{.user}}.go",
+			rawContent:         "package dir\n\nconst FavoriteNumber=19",
+			expectedGenPath:    "dir/vasco.go",
+			expectedGenContent: "package dir\n\nconst FavoriteNumber=19",
 		},
 		{
-			Path:     "nested/file.txt",
-			Mode:     os.ModePerm,
-			Template: false,
-			Content:  []byte("this file is nested\n"),
-		},
-		{
-			Path:     "template.go",
-			Mode:     os.ModePerm,
-			Template: true,
-			Content:  []byte("package generated\n\nconst Version = \"{{ .Version }}\"\n"),
+			name:               "template in content",
+			rawPath:            "dir/maria.go",
+			rawContent:         "package dir\n\nconst FavoriteNumber={{.number}}",
+			expectedGenPath:    "dir/maria.go",
+			expectedGenContent: "package dir\n\nconst FavoriteNumber=22",
 		},
 	}
 
-	tVars := map[string]interface{}{"Version": "v0.1.4"}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			genPath, genContent, err := generateFromTemplate(tt.rawPath, tt.rawContent, input)
+			require.Nil(t, err)
+			require.Equal(t, tt.expectedGenPath, *genPath)
+			require.Equal(t, tt.expectedGenContent, *genContent)
+		})
+	}
+}
 
-	err := write(root, files, tVars)
-	require.Nil(t, err)
+func Test_generateFromTemplate_error(t *testing.T) {
+	input := common.InputVariables{
+		"user":   "vasco",
+		"number": 22,
+	}
 
-	simpleMD, err := ioutil.ReadFile(filepath.Join(root, files[0].Path))
-	require.Nil(t, err)
-	require.Equal(t, simpleMD, files[0].Content)
+	tests := []struct {
+		name       string
+		rawPath    string
+		rawContent string
+	}{
+		{
+			name:       "template in path",
+			rawPath:    "dir/{{.username}}.go",
+			rawContent: "package dir\n\nconst FavoriteNumber=19",
+		},
+		{
+			name:       "template in content",
+			rawPath:    "dir/maria.go",
+			rawContent: "package dir\n\nconst FavoriteNumber={{.favoritenumber}}",
+		},
+	}
 
-	nested, err := ioutil.ReadFile(filepath.Join(root, files[1].Path))
-	require.Nil(t, err)
-	require.Equal(t, nested, files[1].Content)
-
-	templateGO, err := ioutil.ReadFile(filepath.Join(root, files[2].Path))
-	require.Nil(t, err)
-	require.Equal(t, templateGO, []byte("package generated\n\nconst Version = \"v0.1.4\"\n"))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, _, err := generateFromTemplate(tt.rawPath, tt.rawContent, input)
+			require.NotNil(t, err)
+		})
+	}
 }

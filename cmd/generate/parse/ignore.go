@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-type Ignorer struct {
+type ignorer struct {
 	dirs     []string
 	patterns []string
 }
 
-func NewIgnorer(root string, r io.Reader) (*Ignorer, error) {
-	i := Ignorer{}
+func newIgnorer(root string, r io.Reader) (*ignorer, error) {
+	i := ignorer{}
 	if r == nil {
 		return &i, nil
 	}
@@ -46,7 +46,7 @@ func NewIgnorer(root string, r io.Reader) (*Ignorer, error) {
 	return &i, nil
 }
 
-func (i *Ignorer) ignore(s string) bool {
+func (i *ignorer) ignore(s string) bool {
 	for _, dir := range i.dirs {
 		target := s
 		for {

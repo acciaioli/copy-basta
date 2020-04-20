@@ -32,14 +32,14 @@ func Test_NewIgnorer(t *testing.T) {
 		"root/*ends",
 		"root/*mids*",
 	}
-	ignorer, err := NewIgnorer("root", strings.NewReader(testLines))
+	ignorer, err := newIgnorer("root", strings.NewReader(testLines))
 	require.Nil(t, err)
 	require.Equal(t, expectedDirs, ignorer.dirs)
 	require.Equal(t, expectedPatterns, ignorer.patterns)
 }
 
 func Test_Ignorer_ignore(t *testing.T) {
-	ignorer, err := NewIgnorer("root", strings.NewReader(testLines))
+	ignorer, err := newIgnorer("root", strings.NewReader(testLines))
 	require.Nil(t, err)
 
 	tests := []struct {
