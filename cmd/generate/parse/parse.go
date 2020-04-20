@@ -2,6 +2,7 @@ package parse
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -11,43 +12,37 @@ import (
 	"copy-basta/cmd/common"
 )
 
-func Parse(root string) ([]common.File, error) {
-	var files []common.File
+type file struct {
+	path string
+	mode os.FileMode
+	r    io.Reader
+}
 
+func Parse(root string) ([]common.File, error) {
 	ignorer, err := getIgnorer(root)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := filepath.Walk(root, func(fPath string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if ignorer.ignore(fPath) {
-			return nil
-		}
-
-		file, err := processFile(fPath, info)
-		if err != nil {
-			return err
-		}
-		if file != nil {
-			files = append(files, *file)
-		}
-
-		return nil
-	}); err != nil {
+	files, err := getFiles(root, ignorer)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := validate(files); err != nil {
+	err = validateFiles(files)
+	if err != nil {
 		return nil, err
 	}
 
-	return files, nil
+	cFiles, err := processFiles(files)
+	if err != nil {
+		return nil, err
+	}
+
+	return cFiles, nil
 }
 
-func getIgnorer(root string) (*Ignorer, error) {
+func getIgnorer(root string) (*ignorer, error) {
 	ignoreFilePath := filepath.Join(root, common.IgnoreFile)
 
 	if fInfo, err := os.Stat(ignoreFilePath); err == nil {
@@ -58,34 +53,86 @@ func getIgnorer(root string) (*Ignorer, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewIgnorer(root, file)
+		return newIgnorer(root, file)
 	}
 
-	return NewIgnorer(root, nil)
+	return newIgnorer(root, nil)
 }
 
-func processFile(filepath string, info os.FileInfo) (*common.File, error) {
-	if info.IsDir() {
-		return nil, nil
-	}
+func getFiles(root string, ignorer *ignorer) ([]file, error) {
+	var files []file
 
-	content, err := ioutil.ReadFile(filepath)
+	err := filepath.Walk(root, func(fPath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if ignorer.ignore(fPath) {
+			return nil
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		r, err := os.Open(fPath)
+		if err != nil {
+			return err
+		}
+		files = append(files, file{path: fPath, mode: info.Mode(), r: r})
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	if path.Ext(filepath) == common.TemplateExtension {
+	return files, nil
+}
+
+func validateFiles(files []file) error {
+	paths := map[string]struct{}{}
+
+	for _, file := range files {
+		if _, found := paths[file.path]; found {
+			return fmt.Errorf("`%s` path found multiple times", file.path)
+		}
+		paths[file.path] = struct{}{}
+	}
+
+	return nil
+}
+
+func processFiles(files []file) ([]common.File, error) {
+	var cFiles []common.File
+	for _, file := range files {
+		cFile, err := processFile(file)
+		if err != nil {
+			return nil, err
+		}
+		cFiles = append(cFiles, *cFile)
+	}
+	return cFiles, nil
+}
+
+func processFile(file file) (*common.File, error) {
+	content, err := ioutil.ReadAll(file.r)
+	if err != nil {
+		return nil, err
+	}
+
+	if path.Ext(file.path) == common.TemplateExtension {
 		return &common.File{
-			Path:     trimRootDir(trimExtension(filepath)),
-			Mode:     info.Mode(),
+			Path:     trimRootDir(trimExtension(file.path)),
+			Mode:     file.mode,
 			Template: true,
 			Content:  content,
 		}, nil
 	}
 
 	return &common.File{
-		Path:     trimRootDir(filepath),
-		Mode:     info.Mode(),
+		Path:     trimRootDir(file.path),
+		Mode:     file.mode,
 		Template: false,
 		Content:  content,
 	}, nil
@@ -101,17 +148,4 @@ func trimRootDir(s string) string {
 		return ss[0]
 	}
 	return strings.Join(ss[1:], "/")
-}
-
-func validate(files []common.File) error {
-	paths := map[string]struct{}{}
-
-	for _, file := range files {
-		if _, found := paths[file.Path]; found {
-			return fmt.Errorf("`%s` path found multiple times", file.Path)
-		}
-		paths[file.Path] = struct{}{}
-	}
-
-	return nil
 }

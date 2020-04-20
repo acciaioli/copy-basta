@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"copy-basta/cmd/common"
@@ -20,28 +21,23 @@ func Write(destDir string, files []common.File, input common.InputVariables) err
 
 func write(destDir string, files []common.File, input common.InputVariables) error {
 	for _, file := range files {
+		fpath := filepath.Join(destDir, file.Path)
 
-		fp, err := createFile(filepath.Join(destDir, file.Path), file.Mode)
+		if !file.Template {
+			err := writeFile(fpath, file.Mode, file.Content)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		genPath, genContent, err := generateFromTemplate(fpath, string(file.Content), input)
 		if err != nil {
 			return err
 		}
-
-		if file.Template {
-			t, err := newTemplate(file.Path, string(file.Content))
-			if err != nil {
-				return err
-			}
-
-			err = t.Execute(fp, input)
-			if err != nil {
-				return err
-			}
-
-		} else {
-			_, err := fp.Write(file.Content)
-			if err != nil {
-				return err
-			}
+		err = writeFile(*genPath, file.Mode, []byte(*genContent))
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -53,22 +49,48 @@ func cleanup(destDir string) {
 	}
 }
 
-func newTemplate(name string, t string) (*template.Template, error) {
-	return template.New(name).Option("missingkey=error").Parse(t)
+func generateFromTemplate(rawPath string, rawContent string, input common.InputVariables) (*string, *string, error) {
+	w := strings.Builder{}
+	pathT, err := template.New("filename").Option("missingkey=error").Parse(rawPath)
+	if err != nil {
+		return nil, nil, err
+	}
+	err = pathT.Execute(&w, input)
+	if err != nil {
+		return nil, nil, err
+	}
+	generatedPath := w.String()
+
+	w.Reset()
+	contentT, err := template.New("content").Option("missingkey=error").Parse(rawContent)
+	if err != nil {
+		return nil, nil, err
+	}
+	err = contentT.Execute(&w, input)
+	if err != nil {
+		return nil, nil, err
+	}
+	generatedContent := w.String()
+
+	return &generatedPath, &generatedContent, nil
 }
 
-func createFile(filepath string, mode os.FileMode) (*os.File, error) {
-	err := os.MkdirAll(path.Dir(filepath), os.ModePerm)
+func writeFile(fpath string, mode os.FileMode, content []byte) error {
+	err := os.MkdirAll(path.Dir(fpath), os.ModePerm)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	f, err := os.Create(filepath)
+	f, err := os.Create(fpath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	err = f.Chmod(mode)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return f, nil
+	_, err = f.Write(content)
+	if err != nil {
+		return err
+	}
+	return nil
 }

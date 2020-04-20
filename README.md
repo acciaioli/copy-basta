@@ -174,11 +174,10 @@ hello Chi!
 
 ## RoadMap
 
-- proper support for `array` and `object` types
-- dynamic directory and file names
+- proper support for `array` and `object` types (including input prompts)
 - generate from remote location (--src=https://github.com/acciaioli/example-template)
 - deal with variables with dashes (this needs to be forbidden or worked around, no good for go templates)
 - code documentation
 - cli documentation
 - heathcheck command (quickly tests the template, for a dev friendly experience)
-- support install via snap, apt, brew
+- support install via snap, apt, brew, etc...
