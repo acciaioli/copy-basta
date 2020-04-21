@@ -16,7 +16,7 @@
 `copy-basta` is templating command line interface (cli) tool.
 It aims to support the usage of template code bases with well defined inputs and outputs.
 
-The cli is written in `go` and only (golang's text/template)[https://golang.org/pkg/text/template/] are supported.
+The cli is written in `go` and only [golang's text/template](https://golang.org/pkg/text/template) are supported.
 This doesn't mean that you need to know `go` to use this tool, it just means that you need to use golang's templating language
 in your template files.
 
@@ -46,7 +46,7 @@ Use "copy-basta [command] --help" for more information about a command.
 
 ### Binary Releases
 
-For Linux, Mac and Windows binary releases are [available here](https://github.com/acciaioli/copy-basta/releases).
+For Linux, Mac and Windows binary releases are [vailable here](https://github.com/acciaioli/copy-basta/releases).
 
 #### Using go (compile source code)
 
