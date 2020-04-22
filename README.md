@@ -11,6 +11,7 @@
 - [RoadMap](#roadmap)
 
 
+---
 ## Intro
 
 `copy-basta` is templating command line interface (cli) tool.
@@ -42,6 +43,7 @@ Flags:
 Use "copy-basta [command] --help" for more information about a command.
 ```
 
+---
 ## Install
 
 ### Binary Releases
@@ -65,6 +67,7 @@ copy-basta version snapshot-user-4334710
 
 This will run `go install` and the binary will be available from your go path
 
+---
 ## How to stop copy pasting
 
 To stop copy-pasting we need a `basta` template project.
@@ -158,10 +161,9 @@ Notice that template specification may provide defaults. In this case I took the
 ```
 ▶ tree new-project -a
 new-project
-├── main.sh
-└── spec.yaml
+└── main.sh
 
-0 directories, 2 files
+0 directories, 1 files
 ```
 
 Our new project is ready!
@@ -172,6 +174,7 @@ Our new project is ready!
 hello Chi!
 ```
 
+---
 ## RoadMap
 
 - proper support for `array` and `object` types (including input prompts)
@@ -181,3 +184,117 @@ hello Chi!
 - cli documentation
 - heathcheck command (quickly tests the template, for a dev friendly experience)
 - support install via snap, apt, brew, etc...
+
+
+---
+## Template Project Documentation
+
+Every file in your template is either a `static file` or a `template file`.
+
+### Template files
+
+A file that ends with `.basta` is a template file. For template files, 
+both file name and file content must be valid go text/template templates.
+
+When generating a new project, 
+these files are copied over to the new dir, 
+the `.basta` extension is dropped 
+and the variable placeholders get replaced with the variables provided by the user.
+File permissions are kept.
+
+(the above is true unless a file [is ignored](#ignoring-files)
+
+### Static files
+
+A file is static by default. All files that are not `basta templates` are `static files`. 
+
+When generating a new project static files are copied over to the new dir.
+File permissions are kept.
+
+(the above is true unless a file [is ignored](#ignoring-files)
+
+There are to "special" static files, the [specification file](#specification) and the [ignore file](#ignoring-files).
+
+### Specification
+
+The specification file (`spec.yaml`) is where we define all the 
+variables required to generate a new project from our template.
+
+These variables will have to be provided when generating a new project.
+
+Example `spec.yaml`
+
+```yaml
+---
+variables:
+    - name: color
+      type: string
+      description: your favorite color
+      default: blue
+    - name: luckyNumber
+      type: integer
+      description: your lucky number
+```
+---
+#### `variable.name`
+__required__, __string__
+
+The name of the variable. These names are the variables of our templates.
+
+---
+#### `variable.type`
+__optional__, __string__
+
+The type of the variable. 
+If provided, it should be an [open API 3.0 type](https://swagger.io/docs/specification/data-models/data-types)
+Both default & user provided values are checked against the type.
+
+When not specified, the type of the variable becomes `any` and type checks are skipped.
+
+---
+#### `variable.description`
+__optional__, __string__
+
+The description of the variable. This helps the user when they are generating a new project.
+
+---
+#### `variable.default`
+__optional__, __any__
+
+The default value for the variable. Can be taken by the user when generating a new project.
+
+The provided default must be consistent with the variable type.
+
+
+### Ignoring Files
+
+The ignore file (`.bastaignore`) is where we define all the 
+directories, files and file patterns that we wish to ignore 
+when generating a new project.
+
+Ignore files will not be processed, therefore the generated project 
+will not contain any of them.
+
+Besides project specific files, 
+we probably want to ignore the 
+`.git` directory, 
+the `spec.yaml` file 
+and the `.bastaignore` file.
+
+__Note that these files are not alike `gitignore` files.__
+
+Example `.bastaignore`
+
+```
+# this is a comment
+
+# this is how we can ignore everything under a directory
+ignored_dir/
+
+# this is how we can ignore a single file 
+ignored_file.txt
+
+# this is how we can ignore file via pattern
+ignored_pattern*
+*.
+```

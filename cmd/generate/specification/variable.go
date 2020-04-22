@@ -30,10 +30,10 @@ const (
 )
 
 type SpecVariable struct {
-	Name        string      `yaml:"name"`
-	Type        openAPIType `yaml:"type"`
-	Default     interface{} `yaml:"default"`
-	Description *string     `yaml:"description"`
+	Name        string       `yaml:"name"`
+	Type        *openAPIType `yaml:"type"`
+	Default     interface{}  `yaml:"default"`
+	Description *string      `yaml:"description"`
 }
 
 func (v *SpecVariable) validate() error {
@@ -43,21 +43,22 @@ func (v *SpecVariable) validate() error {
 	}
 
 	// type checks
-	if v.Type == "" {
-		return errors.New("variable error [type]: is required")
-	}
-	if ok := func(t openAPIType) bool {
-		for _, t := range []openAPIType{
-			openAPIString, openAPINumber, openAPIInteger, openAPIBoolean, openAPIArray, openAPIObject,
-		} {
-			if v.Type == t {
-				return true
+	if v.Type != nil {
+		if ok := func(actual openAPIType) bool {
+			for _, candidate := range []openAPIType{
+				openAPIString, openAPINumber, openAPIInteger, openAPIBoolean, openAPIArray, openAPIObject,
+			} {
+				if actual == candidate {
+					return true
+				}
 			}
+			return false
+		}(*v.Type); !ok {
+			return fmt.Errorf(`variable error [type]: %s is not a valid type. 
+only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, *v.Type)
 		}
-		return false
-	}(v.Type); !ok {
-		return fmt.Errorf(`variable error [type]: %s is not a valid type. 
-only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, v.Type)
+	} else {
+		log.L.WarnWithData("spec variable without type, defaulting to any", log.Data{"name": v.Name})
 	}
 
 	// default checks
@@ -71,6 +72,10 @@ only open-api types are supported (https://swagger.io/docs/specification/data-mo
 }
 
 func (v *SpecVariable) valueOk(value interface{}) error {
+	if v.Type == nil {
+		return nil
+	}
+
 	actualKind := reflect.TypeOf(value).Kind()
 
 	isOneOF := func(actual reflect.Kind, accepted []reflect.Kind) error {
@@ -80,12 +85,12 @@ func (v *SpecVariable) valueOk(value interface{}) error {
 			}
 		}
 		format := "value error: decoded to type %v, expected one of %v. variable type is %s"
-		return fmt.Errorf(format, actual, accepted, string(v.Type))
+		return fmt.Errorf(format, actual, accepted, string(*v.Type))
 	}
 
 	var acceptedKinds []reflect.Kind
 
-	switch v.Type {
+	switch *v.Type {
 	case openAPIString:
 		acceptedKinds = []reflect.Kind{reflect.String}
 	case openAPINumber:
@@ -99,9 +104,9 @@ func (v *SpecVariable) valueOk(value interface{}) error {
 	case openAPIObject:
 		acceptedKinds = []reflect.Kind{reflect.Map}
 	default:
-		log.L.DebugWithData("default case should not run", log.Data{"type": v.Type, "value": value})
+		log.L.DebugWithData("default case should not run", log.Data{"name": v.Name, "type": *v.Type, "value": value})
 		return fmt.Errorf(`variable error: %s is not a valid type. 
-only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, v.Type)
+only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, *v.Type)
 	}
 
 	return isOneOF(actualKind, acceptedKinds)
@@ -111,7 +116,13 @@ func (v *SpecVariable) prompt() string {
 	sBuilder := strings.Builder{}
 	qMark := common.ColoredFormat(common.ColorOrange, common.TextFormatBold, common.BGColorNone, "?")
 	coloredName := common.ColoredFormat(common.ColorGreen, common.TextFormatBold, common.BGColorNone, v.Name)
-	coloredType := common.ColoredFormat(common.ColorCyan, common.TextFormatBold, common.BGColorNone, string(v.Type))
+	vType := func() string {
+		if v.Type != nil {
+			return string(*v.Type)
+		}
+		return "any"
+	}()
+	coloredType := common.ColoredFormat(common.ColorCyan, common.TextFormatBold, common.BGColorNone, vType)
 
 	if v.Description != nil {
 		coloredDescription := common.ColoredFormat(
@@ -137,10 +148,13 @@ func (v *SpecVariable) prompt() string {
 }
 
 func (v *SpecVariable) process(s string) (interface{}, error) {
+	if v.Type == nil {
+		return s, nil
+	}
 	var value interface{}
 	var err error
 
-	switch v.Type {
+	switch *v.Type {
 	case openAPIString:
 		value = s
 	case openAPINumber:
@@ -163,14 +177,14 @@ func (v *SpecVariable) process(s string) (interface{}, error) {
 		}
 		value = valueMap
 	default:
-		log.L.DebugWithData("default case should not run", log.Data{"type": v.Type, "value": value})
+		log.L.DebugWithData("default case should not run", log.Data{"name": v.Name, "type": *v.Type, "value": value})
 		return nil, fmt.Errorf(`variable error: %s is not a valid type. 
-only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, v.Type)
+only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, *v.Type)
 	}
 
 	if err != nil {
-		log.L.DebugWithData("external error", log.Data{"type": v.Type, "string-value": value, "error": err.Error()})
-		err = fmt.Errorf("variable value error: failed to parse string-value %s, open-api type is %s", value, v.Type)
+		log.L.DebugWithData("external error", log.Data{"type": *v.Type, "string-value": value, "error": err.Error()})
+		err = fmt.Errorf("variable value error: failed to parse string-value %s, open-api type is %s", value, *v.Type)
 	}
 	return value, err
 }

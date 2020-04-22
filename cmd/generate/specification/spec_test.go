@@ -27,11 +27,11 @@ variables:
 				Variables: []SpecVariable{
 					{
 						Name: "stringHi",
-						Type: "string",
+						Type: func() *openAPIType { v := openAPIType("string"); return &v }(),
 					},
 					{
 						Name: "float21_6",
-						Type: "number",
+						Type: func() *openAPIType { v := openAPIType("number"); return &v }(),
 					},
 				},
 			},
@@ -52,13 +52,13 @@ variables:
 				Variables: []SpecVariable{
 					{
 						Name:        "stringHello",
-						Type:        "string",
+						Type:        func() *openAPIType { v := openAPIType("string"); return &v }(),
 						Default:     "hello",
 						Description: func() *string { s := "used to greet"; return &s }(),
 					},
 					{
 						Name:        "int75",
-						Type:        "number",
+						Type:        func() *openAPIType { v := openAPIType("number"); return &v }(),
 						Default:     75,
 						Description: func() *string { s := "an integer"; return &s }(),
 					},

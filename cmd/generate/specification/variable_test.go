@@ -6,6 +6,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func newSpecVar(t openAPIType) SpecVariable {
+	return SpecVariable{
+		Type: &t,
+	}
+}
+
 func Test_SpecVariable_valueOK(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -14,38 +20,45 @@ func Test_SpecVariable_valueOK(t *testing.T) {
 	}{
 		{
 			name:    "string to string",
-			specVar: SpecVariable{Type: openAPIString},
+			specVar: newSpecVar(openAPIString),
 			value:   "a string",
 		},
 		{
 			name:    "int to number",
-			specVar: SpecVariable{Type: openAPINumber},
+			specVar: newSpecVar(openAPINumber),
 			value:   10,
 		},
 		{
 			name:    "float to number",
-			specVar: SpecVariable{Type: openAPINumber},
+			specVar: newSpecVar(openAPINumber),
 			value:   10.2,
 		},
 		{
 			name:    "int to integer",
-			specVar: SpecVariable{Type: openAPIInteger},
+			specVar: newSpecVar(openAPIInteger),
 			value:   11,
 		},
 		{
 			name:    "bool to boolean",
-			specVar: SpecVariable{Type: openAPIBoolean},
+			specVar: newSpecVar(openAPIBoolean),
 			value:   true,
 		},
 		{
 			name:    "slice to array",
-			specVar: SpecVariable{Type: openAPIArray},
+			specVar: newSpecVar(openAPIArray),
 			value:   []interface{}{"hello", 12},
 		},
 		{
 			name:    "map to object",
-			specVar: SpecVariable{Type: openAPIObject},
+			specVar: newSpecVar(openAPIObject),
 			value:   map[string]interface{}{"string": "value", "integer": 13},
+		},
+		{
+			name: "missing type",
+			specVar: SpecVariable{
+				Type: nil,
+			},
+			value: "any value would do",
 		},
 	}
 
@@ -65,37 +78,37 @@ func Test_SpecVariable_valueOK_error(t *testing.T) {
 	}{
 		{
 			name:    "int to string",
-			specVar: SpecVariable{Type: openAPIString},
+			specVar: newSpecVar(openAPIString),
 			value:   4,
 		},
 		{
 			name:    "string to number",
-			specVar: SpecVariable{Type: openAPINumber},
+			specVar: newSpecVar(openAPINumber),
 			value:   "not a number",
 		},
 		{
 			name:    "bool to integer",
-			specVar: SpecVariable{Type: openAPIInteger},
+			specVar: newSpecVar(openAPIInteger),
 			value:   false,
 		},
 		{
 			name:    "float to boolean",
-			specVar: SpecVariable{Type: openAPIBoolean},
+			specVar: newSpecVar(openAPIBoolean),
 			value:   9.3,
 		},
 		{
 			name:    "map to array",
-			specVar: SpecVariable{Type: openAPIArray},
+			specVar: newSpecVar(openAPIArray),
 			value:   map[string]interface{}{"bool": true},
 		},
 		{
 			name:    "map to object",
-			specVar: SpecVariable{Type: openAPIObject},
+			specVar: newSpecVar(openAPIObject),
 			value:   []interface{}{"bye", 934},
 		},
 		{
 			name:    "unknown type",
-			specVar: SpecVariable{Type: openAPIType("unknown")},
+			specVar: newSpecVar("unknown"),
 			value:   "",
 		},
 	}
@@ -117,7 +130,7 @@ func Test_SpecVariable_validate(t *testing.T) {
 			name: "simple",
 			specVar: SpecVariable{
 				Name:        "simple",
-				Type:        openAPIString,
+				Type:        nil,
 				Default:     nil,
 				Description: nil,
 			},
@@ -126,7 +139,7 @@ func Test_SpecVariable_validate(t *testing.T) {
 			name: "complete",
 			specVar: SpecVariable{
 				Name:        "complete",
-				Type:        openAPIInteger,
+				Type:        func() *openAPIType { v := openAPIInteger; return &v }(),
 				Default:     2289,
 				Description: func() *string { s := "a legit integer"; return &s }(),
 			},
@@ -149,16 +162,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 		{
 			name: "missing name",
 			specVar: SpecVariable{
-				Type:        openAPIBoolean,
-				Default:     nil,
-				Description: nil,
-			},
-		},
-		{
-			name: "missing type",
-			specVar: SpecVariable{
-				Name:        "myName",
-				Type:        "",
+				Type:        func() *openAPIType { v := openAPIBoolean; return &v }(),
 				Default:     nil,
 				Description: nil,
 			},
@@ -167,7 +171,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 			name: "invalid type",
 			specVar: SpecVariable{
 				Name:        "myName",
-				Type:        openAPIType("notValid"),
+				Type:        func() *openAPIType { v := openAPIType("notValid"); return &v }(),
 				Default:     nil,
 				Description: nil,
 			},
@@ -176,7 +180,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 			name: "invalid default",
 			specVar: SpecVariable{
 				Name:        "myName",
-				Type:        openAPIBoolean,
+				Type:        func() *openAPIType { v := openAPIBoolean; return &v }(),
 				Default:     44,
 				Description: func() *string { s := "a boolean, therefore not a integer"; return &s }(),
 			},
@@ -192,6 +196,8 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 }
 
 func Test_SpecVariable_prompt(t *testing.T) {
+	myType := openAPIType("myType")
+
 	tests := []struct {
 		name       string
 		specVar    SpecVariable
@@ -201,7 +207,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 			name: "simple",
 			specVar: SpecVariable{
 				Name:        "myVariable",
-				Type:        "myType",
+				Type:        &myType,
 				Default:     nil,
 				Description: nil,
 			},
@@ -211,7 +217,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 			name: "with default",
 			specVar: SpecVariable{
 				Name:        "myVariable",
-				Type:        "myType",
+				Type:        &myType,
 				Default:     "myDefault",
 				Description: nil,
 			},
@@ -221,7 +227,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 			name: "with description",
 			specVar: SpecVariable{
 				Name:        "myVariable",
-				Type:        "myType",
+				Type:        &myType,
 				Default:     nil,
 				Description: func() *string { s := "my template variable description"; return &s }(),
 			},
@@ -231,11 +237,21 @@ func Test_SpecVariable_prompt(t *testing.T) {
 			name: "with default and description",
 			specVar: SpecVariable{
 				Name:        "myVariable",
-				Type:        "myType",
+				Type:        &myType,
 				Default:     "myDefault",
 				Description: func() *string { s := "my template variable description"; return &s }(),
 			},
 			expectedIn: []string{"my template variable description", "myType", "?", "myVariable", "myDefault"},
+		},
+		{
+			name: "no type",
+			specVar: SpecVariable{
+				Name:        "myVariable",
+				Type:        nil,
+				Default:     "myDefault",
+				Description: func() *string { s := "my template variable description"; return &s }(),
+			},
+			expectedIn: []string{"my template variable description", "?", "myVariable", "myDefault"},
 		},
 	}
 
@@ -259,37 +275,37 @@ func Test_SpecVariable_process(t *testing.T) {
 	}{
 		{
 			name:          "string",
-			specVar:       SpecVariable{Type: openAPIString},
+			specVar:       newSpecVar(openAPIString),
 			text:          "a string",
 			expectedValue: "a string",
 		},
 		{
 			name:          "number",
-			specVar:       SpecVariable{Type: openAPINumber},
+			specVar:       newSpecVar(openAPINumber),
 			text:          "42.1",
 			expectedValue: 42.1,
 		},
 		{
 			name:          "integer",
-			specVar:       SpecVariable{Type: openAPIInteger},
+			specVar:       newSpecVar(openAPIInteger),
 			text:          "73",
 			expectedValue: 73,
 		},
 		{
 			name:          "boolean",
-			specVar:       SpecVariable{Type: openAPIBoolean},
+			specVar:       newSpecVar(openAPIBoolean),
 			text:          "true",
 			expectedValue: true,
 		},
 		{
 			name:          "slice",
-			specVar:       SpecVariable{Type: openAPIArray},
+			specVar:       newSpecVar(openAPIArray),
 			text:          "eleven,12",
 			expectedValue: []string{"eleven", "12"},
 		},
 		{
 			name:          "map",
-			specVar:       SpecVariable{Type: openAPIObject},
+			specVar:       newSpecVar(openAPIObject),
 			text:          "key1=value1,key2=22,key3=false",
 			expectedValue: map[string]string{"key1": "value1", "key2": "22", "key3": "false"},
 		},

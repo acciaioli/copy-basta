@@ -78,6 +78,7 @@ const (
 # ignored patterns
 readme.md
 .bastaignore
+spec.yaml
 `
 	readmeFileName = "readme.md"
 	readmeText     = `# template
