@@ -184,6 +184,7 @@ hello Chi!
 - cli documentation
 - heathcheck command (quickly tests the template, for a dev friendly experience)
 - support install via snap, apt, brew, etc...
+- enable different templating languages
 
 
 ---
