@@ -229,9 +229,9 @@ func Test_SpecVariable_prompt(t *testing.T) {
 				Name:        "myVariable",
 				Type:        &myType,
 				Default:     nil,
-				Description: func() *string { s := "my template variable description"; return &s }(),
+				Description: func() *string { s := "my template variable description 1"; return &s }(),
 			},
-			expectedIn: []string{"my template variable description", "myType", "?", "myVariable"},
+			expectedIn: []string{"my template variable description 1", "myType", "?", "myVariable"},
 		},
 		{
 			name: "with default and description",
@@ -239,9 +239,9 @@ func Test_SpecVariable_prompt(t *testing.T) {
 				Name:        "myVariable",
 				Type:        &myType,
 				Default:     "myDefault",
-				Description: func() *string { s := "my template variable description"; return &s }(),
+				Description: func() *string { s := "my template variable description 2"; return &s }(),
 			},
-			expectedIn: []string{"my template variable description", "myType", "?", "myVariable", "myDefault"},
+			expectedIn: []string{"my template variable description 2", "myType", "?", "myVariable", "myDefault"},
 		},
 		{
 			name: "no type",
@@ -249,9 +249,9 @@ func Test_SpecVariable_prompt(t *testing.T) {
 				Name:        "myVariable",
 				Type:        nil,
 				Default:     "myDefault",
-				Description: func() *string { s := "my template variable description"; return &s }(),
+				Description: func() *string { s := "my template variable description 3"; return &s }(),
 			},
-			expectedIn: []string{"my template variable description", "?", "myVariable", "myDefault"},
+			expectedIn: []string{"my template variable description 3", "?", "myVariable", "myDefault"},
 		},
 	}
 
