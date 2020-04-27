@@ -7,20 +7,20 @@ import (
 )
 
 func Test_validate_ok(t *testing.T) {
-	files := []file{
-		{path: "a.go"},
-		{path: "a.md"},
-		{path: "b.txt"},
+	files := []LoadedFile{
+		{Path: "a.go"},
+		{Path: "a.md"},
+		{Path: "b.txt"},
 	}
 	err := validateFiles(files)
 	require.Nil(t, err)
 }
 
 func Test_validate_err(t *testing.T) {
-	files := []file{
-		{path: "a.go"},
-		{path: "a.md"},
-		{path: "a.go"},
+	files := []LoadedFile{
+		{Path: "a.go"},
+		{Path: "a.md"},
+		{Path: "a.go"},
 	}
 	err := validateFiles(files)
 	require.NotNil(t, err)

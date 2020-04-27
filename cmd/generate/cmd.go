@@ -1,9 +1,12 @@
 package generate
 
 import (
+	"copy-basta/cmd/generate/parse/disk"
+	"copy-basta/cmd/generate/parse/github"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"copy-basta/cmd/common/log"
 
@@ -99,7 +102,11 @@ func (cmd *Command) Run() error {
 	}
 
 	log.L.Info("parsing template files")
-	files, err := parse.Parse(cmd.src)
+	loader, err := cmd.getLoader()
+	if err != nil {
+		return err
+	}
+	files, err := parse.Parse(loader)
 	if err != nil {
 		return err
 	}
@@ -173,6 +180,17 @@ func (cmd *Command) validate() error {
 	}
 
 	return nil
+}
+
+func (cmd *Command) getLoader() (parse.Loader, error) {
+	switch {
+	case strings.HasPrefix(cmd.src, github.SourcePrefix):
+		log.L.Debug("using github loader")
+		return github.NewLoader(strings.TrimPrefix(cmd.src, github.SourcePrefix))
+	default:
+		log.L.Debug("using disk loader")
+		return disk.NewLoader(cmd.src)
+	}
 }
 
 func fileExists(flagName string, filePath string) error {

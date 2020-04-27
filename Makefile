@@ -21,9 +21,14 @@ test:
 	@ go test `go list ./... | grep -v internal`
 	@ echo ">> done"
 
-test-integration:
-	@ echo ">> running tests"
-	@ go test --count=1 -v --tags=integration `go list ./... | grep -v internal`
+test-github:
+	@ echo ">> running tests (+github)"
+	@ go test --count=1 -v --tags=github `go list ./... | grep -v internal`
+	@ echo ">> done"
+
+test-all:
+	@ echo ">> running all tests"
+	@ go test --count=1 -v --tags=github `go list ./... | grep -v internal`
 	@ echo ">> done"
 
 cover:

@@ -1,4 +1,4 @@
-package parse
+package ignore
 
 import (
 	"io"
@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-type ignorer struct {
+type Ignorer struct {
 	dirs     []string
 	patterns []string
 }
 
-func newIgnorer(root string, r io.Reader) (*ignorer, error) {
-	i := ignorer{}
+func New(root string, r io.Reader) (*Ignorer, error) {
+	i := Ignorer{}
 	if r == nil {
 		return &i, nil
 	}
@@ -46,7 +46,7 @@ func newIgnorer(root string, r io.Reader) (*ignorer, error) {
 	return &i, nil
 }
 
-func (i *ignorer) ignore(s string) bool {
+func (i *Ignorer) Ignore(s string) bool {
 	for _, dir := range i.dirs {
 		target := s
 		for {
