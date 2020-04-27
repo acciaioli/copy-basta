@@ -1,13 +1,13 @@
 package disk
 
 import (
-	"copy-basta/cmd/generate/parse"
 	"os"
 	"testing"
 
-	"copy-basta/cmd/common"
-
 	"github.com/stretchr/testify/require"
+
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/generate/parse"
 )
 
 func Test_Integration_Parse_Local(t *testing.T) {

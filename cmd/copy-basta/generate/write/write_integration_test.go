@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"copy-basta/cmd/common"
+	"copy-basta/cmd/copy-basta/common"
 )
 
 func Test_Integration_Write(t *testing.T) {

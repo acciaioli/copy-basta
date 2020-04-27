@@ -1,20 +1,20 @@
 package generate
 
 import (
-	"copy-basta/cmd/generate/parse/disk"
-	"copy-basta/cmd/generate/parse/github"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"copy-basta/cmd/common/log"
+	"copy-basta/cmd/copy-basta/common/log"
 
-	"copy-basta/cmd/generate/specification"
+	"copy-basta/cmd/copy-basta/generate/specification"
 
-	"copy-basta/cmd/common"
-	"copy-basta/cmd/generate/parse"
-	"copy-basta/cmd/generate/write"
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/generate/parse"
+	"copy-basta/cmd/copy-basta/generate/parse/disk"
+	"copy-basta/cmd/copy-basta/generate/parse/github"
+	"copy-basta/cmd/copy-basta/generate/write"
 )
 
 const (

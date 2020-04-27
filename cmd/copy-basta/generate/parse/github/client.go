@@ -1,46 +1,28 @@
 package github
 
 import (
-	"copy-basta/cmd/common/log"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"copy-basta/cmd/copy-basta/common/log"
 )
 
-// GithubRepositoryContent represents a LoadedFile or directory in a github repository.
-type RepositoryEntry struct {
-	Type string `json:"type"`
-	Path string `json:"path"`
+/*
+reference: https://developer.github.com/v3/repos/contents/#get-contents
+*/
 
-	// Target is only set if the type is "symlink" and the target is not a normal LoadedFile.
-	// If Target is set, Path will be the symlink path.
-	Target   *string `json:"target,omitempty"`
-	Encoding *string `json:"encoding,omitempty"`
-	Size     *int    `json:"size,omitempty"`
-	Name     *string `json:"name,omitempty"`
+const (
+	contentTypeFile = "file"
+)
 
-	// Content contains the actual LoadedFile content, which may be encoded.
-	// Callers should call GetContent which will decode the content if
-	// necessary.
-	Content     *string `json:"content,omitempty"`
-	SHA         *string `json:"sha,omitempty"`
-	URL         *string `json:"url,omitempty"`
-	GitURL      *string `json:"git_url,omitempty"`
-	HTMLURL     *string `json:"html_url,omitempty"`
-	DownloadURL *string `json:"download_url,omitempty"`
+type repoContent struct {
+	Type    string  `json:"type"`
+	Path    string  `json:"path"`
+	Content *string `json:"content"`
 }
-
-const (
-	contentTypeFile    = "file"
-	contentTypeDir     = "dir"
-	contentTypeSymlink = "symlink"
-)
-
-const (
-	defaultMode = 0666
-)
 
 type Client struct {
 	repoNamespace string

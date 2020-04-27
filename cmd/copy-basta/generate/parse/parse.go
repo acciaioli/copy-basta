@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"copy-basta/cmd/common"
+	"copy-basta/cmd/copy-basta/common"
 )
 
 type LoadedFile struct {

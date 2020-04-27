@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"copy-basta/cmd/common"
+	"copy-basta/cmd/copy-basta/common"
 
 	"github.com/stretchr/testify/require"
 )

@@ -3,13 +3,13 @@
 package github
 
 import (
-	"copy-basta/cmd/common"
-	"copy-basta/cmd/generate/parse"
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/generate/parse"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"copy-basta/cmd/common/log"
+	"copy-basta/cmd/copy-basta/common/log"
 )
 
 func Test_Integration_Parse_Github(t *testing.T) {

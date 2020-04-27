@@ -11,8 +11,8 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"copy-basta/cmd/common"
-	"copy-basta/cmd/common/log"
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/common/log"
 )
 
 type Spec struct {

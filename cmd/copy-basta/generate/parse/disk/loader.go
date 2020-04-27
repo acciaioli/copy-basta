@@ -1,13 +1,14 @@
 package disk
 
 import (
-	"copy-basta/cmd/common"
-	"copy-basta/cmd/common/log"
-	"copy-basta/cmd/generate/parse"
-	"copy-basta/cmd/generate/parse/ignore"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/copy-basta/generate/parse"
+	"copy-basta/cmd/copy-basta/generate/parse/ignore"
 )
 
 type Loader struct {

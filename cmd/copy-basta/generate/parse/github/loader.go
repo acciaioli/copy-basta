@@ -3,15 +3,16 @@ package github
 import (
 	"archive/zip"
 	"bytes"
-	"copy-basta/cmd/common"
-	"copy-basta/cmd/common/log"
-	"copy-basta/cmd/generate/parse"
-	"copy-basta/cmd/generate/parse/ignore"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"mime"
 	"strings"
+
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/copy-basta/generate/parse"
+	"copy-basta/cmd/copy-basta/generate/parse/ignore"
 )
 
 const (
@@ -34,12 +35,18 @@ func (l *Loader) LoadFiles() ([]parse.LoadedFile, error) {
 	url := l.ghc.zipArchiveURL()
 	headers, data, err := l.ghc.DoGetRequest(url)
 	if len(headers["Content-Disposition"]) != 1 {
-		log.L.DebugWithData("github response error: Content-Disposition", log.Data{"url": url, "content-disposition": headers["Content-Disposition"]})
+		log.L.DebugWithData(
+			"github response error: Content-Disposition",
+			log.Data{"url": url, "content-disposition": headers["Content-Disposition"]},
+		)
 		return nil, errors.New("github api response error: invalid `Content-Disposition` header")
 	}
 	_, params, err := mime.ParseMediaType(headers["Content-Disposition"][0])
 	if err != nil {
-		log.L.DebugWithData("github response error: Content-Disposition", log.Data{"url": url, "content-disposition": headers["Content-Disposition"], "error": err.Error()})
+		log.L.DebugWithData(
+			"github response error: Content-Disposition",
+			log.Data{"url": url, "content-disposition": headers["Content-Disposition"], "error": err.Error()},
+		)
 		return nil, errors.New("github api response error: invalid `Content-Disposition` header")
 	}
 
@@ -88,7 +95,7 @@ func (l *Loader) getIgnorer(root string) (*ignore.Ignorer, error) {
 		return ignore.New(root, nil)
 	}
 
-	var entry RepositoryEntry
+	var entry repoContent
 	err = json.Unmarshal(b, &entry)
 	if err != nil {
 		log.L.DebugWithData("external error", log.Data{"error": err.Error()})

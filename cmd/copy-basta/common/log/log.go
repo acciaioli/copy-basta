@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"copy-basta/cmd/common"
+	"copy-basta/cmd/copy-basta/common"
 )
 
 var L Logger
