@@ -1,7 +1,7 @@
 package main
 
 import (
-	"copy-basta/cmd/common/log"
+	"copy-basta/cmd/copy-basta/common/log"
 )
 
 func main() {

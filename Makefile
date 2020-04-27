@@ -21,6 +21,16 @@ test:
 	@ go test `go list ./... | grep -v internal`
 	@ echo ">> done"
 
+test-github:
+	@ echo ">> running tests (+github)"
+	@ go test --count=1 -v --tags=github `go list ./... | grep -v internal`
+	@ echo ">> done"
+
+test-all:
+	@ echo ">> running all tests"
+	@ go test --count=1 -v --tags=github `go list ./... | grep -v internal`
+	@ echo ">> done"
+
 cover:
 	@ echo ">> running tests and coverage"
 	@ go test --count=1 --v --cover --coverprofile=cover.out `go list ./... | grep -v internal`

@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"copy-basta/cmd/common/log"
-
-	"copy-basta/cmd/generate/specification"
-
-	"copy-basta/cmd/common"
-	"copy-basta/cmd/generate/parse"
-	"copy-basta/cmd/generate/write"
+	"copy-basta/cmd/copy-basta/clients/github"
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/copy-basta/generate/parse"
+	"copy-basta/cmd/copy-basta/generate/parse/parsediskloader"
+	"copy-basta/cmd/copy-basta/generate/parse/parsegithubloader"
+	"copy-basta/cmd/copy-basta/generate/specification"
+	"copy-basta/cmd/copy-basta/generate/specification/specificationdiskloader"
+	"copy-basta/cmd/copy-basta/generate/specification/specificationgithubloader"
+	"copy-basta/cmd/copy-basta/generate/write"
 )
 
 const (
@@ -37,6 +41,8 @@ type Command struct {
 	dest      string
 	specYAML  string
 	inputYAML string
+
+	ghc *github.Client
 }
 
 func NewCommand() *Command {
@@ -93,13 +99,21 @@ func (cmd *Command) Run() error {
 	}
 
 	log.L.Info("loading specification file")
-	spec, err := specification.New(cmd.specFullPath())
+	specLoader, err := cmd.getSpecificationLoader()
+	if err != nil {
+		return err
+	}
+	spec, err := specification.New(specLoader)
 	if err != nil {
 		return err
 	}
 
 	log.L.Info("parsing template files")
-	files, err := parse.Parse(cmd.src)
+	parseLoader, err := cmd.getParseLoader()
+	if err != nil {
+		return err
+	}
+	files, err := parse.Parse(parseLoader)
 	if err != nil {
 		return err
 	}
@@ -144,11 +158,38 @@ func (cmd *Command) validate() error {
 	if cmd.src == "" {
 		return common.NewFlagValidationError(flagSrc, "is required")
 	}
-	if _, err := os.Stat(cmd.src); err != nil {
-		if os.IsNotExist(err) {
-			return common.NewFlagValidationError(flagSrc, fmt.Sprintf("(%s) directory not found", cmd.src))
+
+	if strings.HasPrefix(cmd.src, common.GithubPrefix) {
+		// remote github
+		ghc, err := github.NewClient(strings.TrimPrefix(cmd.src, common.GithubPrefix))
+		if err != nil {
+			return err
 		}
-		return err
+		cmd.ghc = ghc
+		// todo: maybe we should rethink how validations are handled
+		log.L.Warn("src is a remote location, skipping validations")
+	} else {
+		// local
+		if _, err := os.Stat(cmd.src); err != nil {
+			if os.IsNotExist(err) {
+				return common.NewFlagValidationError(flagSrc, fmt.Sprintf("(%s) directory not found", cmd.src))
+			}
+			return err
+		}
+
+		if cmd.specYAML == "" {
+			return common.NewFlagValidationError(flagSpec, "is required")
+		}
+		specYAML := cmd.specFullPath()
+		if err := fileExists(flagSpec, specYAML); err != nil {
+			return err
+		}
+
+		if cmd.inputYAML != "" {
+			if err := fileExists(flagInput, cmd.inputYAML); err != nil {
+				return err
+			}
+		}
 	}
 
 	if cmd.dest == "" {
@@ -158,21 +199,29 @@ func (cmd *Command) validate() error {
 		return common.NewFlagValidationError(flagDest, fmt.Sprintf("(%s) directory already exists", cmd.dest))
 	}
 
-	if cmd.specYAML == "" {
-		return common.NewFlagValidationError(flagSpec, "is required")
-	}
-	specYAML := cmd.specFullPath()
-	if err := fileExists(flagSpec, specYAML); err != nil {
-		return err
-	}
-
-	if cmd.inputYAML != "" {
-		if err := fileExists(flagInput, cmd.inputYAML); err != nil {
-			return err
-		}
-	}
-
 	return nil
+}
+
+func (cmd *Command) getParseLoader() (parse.Loader, error) {
+	switch {
+	case strings.HasPrefix(cmd.src, common.GithubPrefix):
+		log.L.Debug("using github loader for parsing")
+		return parsegithubloader.New(cmd.ghc)
+	default:
+		log.L.Debug("using disk loader for parsing")
+		return parsediskloader.NewLoader(cmd.src)
+	}
+}
+
+func (cmd *Command) getSpecificationLoader() (specification.Loader, error) {
+	switch {
+	case strings.HasPrefix(cmd.src, common.GithubPrefix):
+		log.L.Debug("using github loader for specification")
+		return specificationgithubloader.New(cmd.specYAML, cmd.ghc)
+	default:
+		log.L.Debug("using disk loader for specification")
+		return specificationdiskloader.New(cmd.specFullPath())
+	}
 }
 
 func fileExists(flagName string, filePath string) error {

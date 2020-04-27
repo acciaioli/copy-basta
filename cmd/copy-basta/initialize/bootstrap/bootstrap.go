@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"copy-basta/cmd/common/log"
+	"copy-basta/cmd/copy-basta/common/log"
 
-	"copy-basta/cmd/common"
+	"copy-basta/cmd/copy-basta/common"
 )
 
 func Bootstrap(destDir string) error {

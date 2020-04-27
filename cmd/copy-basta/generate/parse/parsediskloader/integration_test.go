@@ -1,15 +1,16 @@
-package parse
+package parsediskloader
 
 import (
 	"os"
 	"testing"
 
-	"copy-basta/cmd/common"
-
 	"github.com/stretchr/testify/require"
+
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/generate/parse"
 )
 
-func Test_Integration_Parse(t *testing.T) {
+func Test_Integration_Parse_Local(t *testing.T) {
 	root := "./test-files"
 	defer func() { _ = os.RemoveAll(root) }()
 
@@ -18,7 +19,7 @@ func Test_Integration_Parse(t *testing.T) {
 
 	dummyMD, err := os.Create("./test-files/nested/dummy.md")
 	require.Nil(t, err)
-	_, err = dummyMD.Write([]byte("# dummy\n\nThis file is useless.\n"))
+	_, err = dummyMD.Write([]byte("# dummy\n\nThis LoadedFile is useless.\n"))
 	require.Nil(t, err)
 
 	exampleBasta, err := os.Create("./test-files/example.txt.basta")
@@ -36,7 +37,7 @@ func Test_Integration_Parse(t *testing.T) {
 		2 directories, 2 files
 	*/
 
-	expectedFile := []common.File{
+	expectedFiles := []common.File{
 		{
 			Path:     "example.txt",
 			Mode:     0666 - 002, // default permission - umask
@@ -47,14 +48,16 @@ func Test_Integration_Parse(t *testing.T) {
 			Path:     "nested/dummy.md",
 			Mode:     0666 - 002, // default permission - umask
 			Template: false,
-			Content:  []byte("# dummy\n\nThis file is useless.\n"),
+			Content:  []byte("# dummy\n\nThis LoadedFile is useless.\n"),
 		},
 	}
 
-	files, err := Parse(root)
+	loader, err := NewLoader(root)
+	require.Nil(t, err)
+	files, err := parse.Parse(loader)
 	require.Nil(t, err)
 
-	require.Equal(t, len(expectedFile), len(files))
-	require.Equal(t, expectedFile[0], files[0])
-	require.Equal(t, expectedFile[1], files[1])
+	require.Equal(t, len(expectedFiles), len(files))
+	require.Equal(t, expectedFiles[0], files[0])
+	require.Equal(t, expectedFiles[1], files[1])
 }

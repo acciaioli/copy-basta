@@ -11,8 +11,8 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"copy-basta/cmd/common"
-	"copy-basta/cmd/common/log"
+	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/common/log"
 )
 
 type Spec struct {
@@ -29,12 +29,16 @@ func (spec *Spec) validate() error {
 	return nil
 }
 
-func New(specsYAML string) (*Spec, error) {
-	f, err := os.Open(specsYAML)
+type Loader interface {
+	LoadReader() (io.Reader, error)
+}
+
+func New(loader Loader) (*Spec, error) {
+	r, err := loader.LoadReader()
 	if err != nil {
 		return nil, err
 	}
-	return newFromReader(f)
+	return newFromReader(r)
 }
 
 func newFromReader(r io.Reader) (*Spec, error) {

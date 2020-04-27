@@ -20,8 +20,7 @@ before_script:
 
 script:
   - make lint
-  - make test
-  - make
+  - make test-all
 
 before_deploy:
   - VERSION=$TRAVIS_TAG make build
@@ -37,7 +36,6 @@ deploy:
   file: bin/*
   skip_cleanup: true
   name: $TRAVIS_TAG
-  body: "This doesnt work and I am tired"
   draft: true
   prerelease: false
   on:
