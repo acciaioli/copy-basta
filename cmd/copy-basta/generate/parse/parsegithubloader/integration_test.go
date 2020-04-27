@@ -1,8 +1,9 @@
 // +build github
 
-package github
+package parsegithubloader
 
 import (
+	"copy-basta/cmd/copy-basta/clients/github"
 	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/generate/parse"
 	"testing"
@@ -15,7 +16,9 @@ import (
 func Test_Integration_Parse_Github(t *testing.T) {
 	log.L.SetLevel(log.Debug)
 	repo := "acciaioli/server-basta-template"
-	loader, err := NewLoader(repo)
+	ghc, err := github.NewClient(repo)
+	require.Nil(t, err)
+	loader, err := New(ghc)
 	require.Nil(t, err)
 
 	files, err := parse.Parse(loader)

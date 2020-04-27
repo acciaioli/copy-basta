@@ -1,38 +1,28 @@
-package github
+package parsegithubloader
 
 import (
 	"archive/zip"
 	"bytes"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"mime"
-	"strings"
 
+	"copy-basta/cmd/copy-basta/clients/github"
 	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
 	"copy-basta/cmd/copy-basta/generate/parse"
 	"copy-basta/cmd/copy-basta/generate/parse/ignore"
 )
 
-const (
-	SourcePrefix = "https://github.com/"
-)
-
 type Loader struct {
-	ghc *Client
+	ghc *github.Client
 }
 
-func NewLoader(repo string) (*Loader, error) {
-	ghc, err := NewGitHubAPIClient(repo)
-	if err != nil {
-		return nil, err
-	}
+func New(ghc *github.Client) (*Loader, error) {
 	return &Loader{ghc: ghc}, nil
 }
 
 func (l *Loader) LoadFiles() ([]parse.LoadedFile, error) {
-	url := l.ghc.zipArchiveURL()
+	url := l.ghc.ZipArchiveURL()
 	headers, data, err := l.ghc.DoGetRequest(url)
 	if len(headers["Content-Disposition"]) != 1 {
 		log.L.DebugWithData(
@@ -89,26 +79,10 @@ func (l *Loader) LoadFiles() ([]parse.LoadedFile, error) {
 }
 
 func (l *Loader) getIgnorer(root string) (*ignore.Ignorer, error) {
-	b, err := l.ghc.GetContents(common.IgnoreFile)
+	b, err := l.ghc.GetContentsFileData(common.IgnoreFile)
 	if err != nil {
-		log.L.Warn(fmt.Sprintf("failed to find %s in this repo. continuing without it.", common.IgnoreFile))
 		return ignore.New(root, nil)
 	}
 
-	var entry repoContent
-	err = json.Unmarshal(b, &entry)
-	if err != nil {
-		log.L.DebugWithData("external error", log.Data{"error": err.Error()})
-		return nil, errors.New("failed to decoded github api json response")
-	}
-	if entry.Type != contentTypeFile {
-		log.L.DebugWithData("ignore file is not a file", log.Data{"path": entry.Path, "type": entry.Type})
-		return nil, errors.New("the ignore file of this repo is not a file")
-	}
-	if entry.Content == nil {
-		log.L.DebugWithData("github content error: nil content", log.Data{"path": entry.Path})
-		return nil, errors.New("failed to get necessary data from the github api json response")
-	}
-
-	return ignore.New(root, strings.NewReader(*entry.Content))
+	return ignore.New(root, bytes.NewReader(b))
 }
