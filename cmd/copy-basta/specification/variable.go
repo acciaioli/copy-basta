@@ -29,14 +29,14 @@ const (
 	openAPIObject  = openAPIType("object")
 )
 
-type SpecVariable struct {
+type Variable struct {
 	Name        string       `yaml:"name"`
 	Type        *openAPIType `yaml:"type"`
 	Default     interface{}  `yaml:"default"`
 	Description *string      `yaml:"description"`
 }
 
-func (v *SpecVariable) validate() error {
+func (v *Variable) validate() error {
 	// name checks
 	if v.Name == "" {
 		return errors.New("variable error [name]: is required")
@@ -71,7 +71,7 @@ only open-api types are supported (https://swagger.io/docs/specification/data-mo
 	return nil
 }
 
-func (v *SpecVariable) valueOk(value interface{}) error {
+func (v *Variable) valueOk(value interface{}) error {
 	if v.Type == nil {
 		return nil
 	}
@@ -112,7 +112,7 @@ only open-api types are supported (https://swagger.io/docs/specification/data-mo
 	return isOneOF(actualKind, acceptedKinds)
 }
 
-func (v *SpecVariable) prompt() string {
+func (v *Variable) prompt() string {
 	sBuilder := strings.Builder{}
 	qMark := common.ColoredFormat(common.ColorOrange, common.TextFormatBold, common.BGColorNone, "?")
 	coloredName := common.ColoredFormat(common.ColorGreen, common.TextFormatBold, common.BGColorNone, v.Name)
@@ -147,7 +147,7 @@ func (v *SpecVariable) prompt() string {
 	return sBuilder.String()
 }
 
-func (v *SpecVariable) process(s string) (interface{}, error) {
+func (v *Variable) process(s string) (interface{}, error) {
 	if v.Type == nil {
 		return s, nil
 	}

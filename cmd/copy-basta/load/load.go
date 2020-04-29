@@ -1,27 +1,79 @@
-package parsegithubloader
+package load
 
 import (
 	"archive/zip"
 	"bytes"
 	"errors"
+	"fmt"
+	"io"
 	"mime"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"copy-basta/cmd/copy-basta/clients/github"
-	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
-	"copy-basta/cmd/copy-basta/generate/parse"
-	"copy-basta/cmd/copy-basta/generate/parse/ignore"
 )
 
-type Loader struct {
+type Loader interface {
+	Load() ([]File, error)
+}
+
+type File struct {
+	Path   string
+	Mode   os.FileMode
+	Reader io.Reader
+}
+
+// =========== disk loader =========== //
+
+type DiskLoader struct {
+	root string
+}
+
+func NewDiskLoader(root string) (*DiskLoader, error) {
+	return &DiskLoader{root: root}, nil
+}
+
+func (l *DiskLoader) Load() ([]File, error) {
+	var files []File
+
+	err := filepath.Walk(l.root, func(fPath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		r, err := os.Open(fPath)
+		if err != nil {
+			log.L.DebugWithData("external error", log.Data{"error": err.Error()})
+			return err
+		}
+		files = append(files, File{Path: trimRootDir(fPath), Mode: info.Mode(), Reader: r})
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
+// =========== github loader =========== //
+
+type GithubLoader struct {
 	ghc *github.Client
 }
 
-func New(ghc *github.Client) (*Loader, error) {
-	return &Loader{ghc: ghc}, nil
+func NewGithubLoader(ghc *github.Client) (*GithubLoader, error) {
+	return &GithubLoader{ghc: ghc}, nil
 }
 
-func (l *Loader) LoadFiles() ([]parse.LoadedFile, error) {
+func (l *GithubLoader) Load() ([]File, error) {
 	url := l.ghc.ZipArchiveURL()
 	headers, data, err := l.ghc.DoGetRequest(url)
 	if len(headers["Content-Disposition"]) != 1 {
@@ -40,10 +92,7 @@ func (l *Loader) LoadFiles() ([]parse.LoadedFile, error) {
 		return nil, errors.New("github api response error: invalid `Content-Disposition` header")
 	}
 
-	ignorer, err := l.getIgnorer(params["filename"])
-	if err != nil {
-		return nil, err
-	}
+	log.L.Debug(fmt.Sprintf("archive filename: %s", params["filename"]))
 
 	r, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
@@ -51,13 +100,9 @@ func (l *Loader) LoadFiles() ([]parse.LoadedFile, error) {
 		return nil, errors.New("github api response error: zip reader failed")
 	}
 
-	var files []parse.LoadedFile
+	var files []File
 
 	for _, zfile := range r.File {
-		if ignorer.Ignore(zfile.Name) {
-			continue
-		}
-
 		info := zfile.FileInfo()
 		if info.IsDir() {
 			continue
@@ -68,8 +113,8 @@ func (l *Loader) LoadFiles() ([]parse.LoadedFile, error) {
 			log.L.DebugWithData("external error", log.Data{"error": err.Error()})
 			return nil, err
 		}
-		files = append(files, parse.LoadedFile{
-			Path:   zfile.Name,
+		files = append(files, File{
+			Path:   trimRootDir(zfile.Name),
 			Mode:   info.Mode(),
 			Reader: r,
 		})
@@ -78,11 +123,12 @@ func (l *Loader) LoadFiles() ([]parse.LoadedFile, error) {
 	return files, nil
 }
 
-func (l *Loader) getIgnorer(root string) (*ignore.Ignorer, error) {
-	b, err := l.ghc.GetContentsFileData(common.IgnoreFile)
-	if err != nil {
-		return ignore.New(root, nil)
-	}
+// =========== helpers =========== //
 
-	return ignore.New(root, bytes.NewReader(b))
+func trimRootDir(s string) string {
+	ss := strings.Split(s, "/")
+	if len(ss) == 1 {
+		return ss[0]
+	}
+	return strings.Join(ss[1:], "/")
 }

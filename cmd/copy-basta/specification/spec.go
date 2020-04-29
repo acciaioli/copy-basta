@@ -13,10 +13,11 @@ import (
 
 	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/copy-basta/load"
 )
 
 type Spec struct {
-	Variables []SpecVariable `yaml:"variables"`
+	Variables []Variable `yaml:"variables"`
 }
 
 func (spec *Spec) validate() error {
@@ -29,16 +30,19 @@ func (spec *Spec) validate() error {
 	return nil
 }
 
-type Loader interface {
-	LoadReader() (io.Reader, error)
-}
-
-func New(loader Loader) (*Spec, error) {
-	r, err := loader.LoadReader()
-	if err != nil {
-		return nil, err
+func New(specFileName string, files []load.File) (*Spec, error) {
+	var specFile *load.File
+	for _, f := range files {
+		if f.Path == specFileName {
+			specFile = &f
+			break
+		}
 	}
-	return newFromReader(r)
+	if specFile == nil {
+		return nil, fmt.Errorf("specification: failed to find spec file (%s)", specFileName)
+	}
+
+	return newFromReader(specFile.Reader)
 }
 
 func newFromReader(r io.Reader) (*Spec, error) {
@@ -105,7 +109,7 @@ func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
 	return inputVars, nil
 }
 
-func promptLoop(r *bufio.Reader, v SpecVariable) (*string, error) {
+func promptLoop(r *bufio.Reader, v Variable) (*string, error) {
 	for {
 		fmt.Print(v.prompt())
 		userInput, err := r.ReadString('\n')

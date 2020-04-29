@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 
-	"copy-basta/cmd/copy-basta/common/log"
-
 	"github.com/spf13/cobra"
 
+	"copy-basta/cmd/copy-basta/commands/generate"
+	"copy-basta/cmd/copy-basta/commands/initialize"
 	"copy-basta/cmd/copy-basta/common"
-	"copy-basta/cmd/copy-basta/generate"
-	"copy-basta/cmd/copy-basta/initialize"
+	"copy-basta/cmd/copy-basta/common/log"
 )
 
 var version = "snapshot" // build-time variable
