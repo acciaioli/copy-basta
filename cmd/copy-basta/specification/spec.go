@@ -91,20 +91,28 @@ func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
 	fmt.Print("\n")
 	inputVars := common.InputVariables{}
 	for _, v := range spec.Variables {
-		userInput, err := promptLoop(r, v)
-		if err != nil {
-			return nil, err
-		}
-
-		if userInput != nil {
-			value, err := v.fromString(*userInput)
+		for retry := 3; retry > 0; retry-- {
+			userInput, err := promptLoop(r, v)
 			if err != nil {
 				return nil, err
 			}
-			inputVars[v.Name] = value
-		} else {
-			inputVars[v.Name] = v.Default
+
+			if userInput != nil {
+				value, err := v.fromString(*userInput)
+				if err != nil {
+					if retry > 1 {
+						fmt.Println(v.Help())
+						continue
+					}
+					return nil, err
+				}
+				inputVars[v.Name] = value
+			} else {
+				inputVars[v.Name] = v.Default
+			}
+			break
 		}
+
 	}
 	return inputVars, nil
 }

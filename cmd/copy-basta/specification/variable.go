@@ -186,14 +186,14 @@ func (v *Variable) fromString(s string) (interface{}, error) {
 		}
 		value = valueMap
 	default:
-		log.L.DebugWithData("default case should not run", log.Data{"name": v.Name, "type": *v.Type, "value": value})
+		log.L.DebugWithData("default case should not run", log.Data{"name": v.Name, "type": *v.Type, "string-value": s})
 		return nil, fmt.Errorf(`variable error: %s is not a valid type. 
 only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, *v.Type)
 	}
 
 	if err != nil {
-		log.L.DebugWithData("external error", log.Data{"type": *v.Type, "string-value": value, "error": err.Error()})
-		err = fmt.Errorf("variable value error: failed to parse string-value %s, open-api type is %s", value, *v.Type)
+		log.L.DebugWithData("external error", log.Data{"type": *v.Type, "string-value": s, "error": err.Error()})
+		err = fmt.Errorf("variable value error: failed to parse string-value `%s` into open-api type `%s`", s, *v.Type)
 	}
 	return value, err
 }
@@ -238,5 +238,28 @@ func (v *Variable) toString(value interface{}) (string, error) {
 		log.L.DebugWithData("default case should not run", log.Data{"name": v.Name})
 		return "", fmt.Errorf(`variable error: %s is not a valid type. 
 only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, *v.Type)
+	}
+}
+
+func (v *Variable) Help() string {
+	if v.Type == nil {
+		return "input is not type, anything will do"
+	}
+	switch *v.Type {
+	case openAPIString:
+		return "input must be a string. example: `pizza`"
+	case openAPINumber:
+		return "input must be a number. example: `3.14`"
+	case openAPIInteger:
+		return "input must be an integer. example: `3`"
+	case openAPIBoolean:
+		return "input must be a boolean. example: `true`"
+	case openAPIArray:
+		return "input myst be an array of strings, example: `pizza,pasta,risotto`"
+	case openAPIObject:
+		return "input myst be an array of strings, example: `pizza=margherita,pasta=bolognese,risotto=mushroom`"
+	default:
+		log.L.DebugWithData("default case should not run", log.Data{"name": v.Name, "type": *v.Type})
+		return ""
 	}
 }
