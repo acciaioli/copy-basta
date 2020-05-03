@@ -1,10 +1,13 @@
 package ignore
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+
+	"copy-basta/cmd/copy-basta/load"
 )
 
 type Ignorer struct {
@@ -12,7 +15,22 @@ type Ignorer struct {
 	patterns []string
 }
 
-func New(root string, r io.Reader) (*Ignorer, error) {
+func New(ignoreFileName string, files []load.File) (*Ignorer, error) {
+	var ignoreFile *load.File
+	for _, f := range files {
+		if f.Path == ignoreFileName {
+			ignoreFile = &f
+			break
+		}
+	}
+	if ignoreFile == nil {
+		return nil, fmt.Errorf("specification: failed to find spec file (%s)", ignoreFileName)
+	}
+
+	return newFromReader(ignoreFile.Reader)
+}
+
+func newFromReader(r io.Reader) (*Ignorer, error) {
 	i := Ignorer{}
 	if r == nil {
 		return &i, nil
@@ -31,16 +49,14 @@ func New(root string, r io.Reader) (*Ignorer, error) {
 
 		if strings.HasSuffix(line, "/") {
 			// completely excluded dir
-			dir := filepath.Join(root, line)
-			i.dirs = append(i.dirs, dir)
+			i.dirs = append(i.dirs, strings.TrimSuffix(line, "/"))
 		} else {
 			// patterns
-			pattern := filepath.Join(root, line)
-			if _, err := filepath.Match(pattern, ""); err != nil {
+			if _, err := filepath.Match(line, ""); err != nil {
 				return nil, err
 			}
 
-			i.patterns = append(i.patterns, pattern)
+			i.patterns = append(i.patterns, line)
 		}
 	}
 	return &i, nil

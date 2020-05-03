@@ -24,7 +24,7 @@ variables:
     type: number
 `),
 			expectedSpec: Spec{
-				Variables: []SpecVariable{
+				Variables: []Variable{
 					{
 						Name: "stringHi",
 						Type: func() *openAPIType { v := openAPIType("string"); return &v }(),
@@ -49,7 +49,7 @@ variables:
     default: 75
     description: an integer`),
 			expectedSpec: Spec{
-				Variables: []SpecVariable{
+				Variables: []Variable{
 					{
 						Name:        "stringHello",
 						Type:        func() *openAPIType { v := openAPIType("string"); return &v }(),

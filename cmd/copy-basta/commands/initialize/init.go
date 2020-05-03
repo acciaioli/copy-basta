@@ -6,7 +6,7 @@ import (
 
 	"copy-basta/cmd/copy-basta/common/log"
 
-	"copy-basta/cmd/copy-basta/initialize/bootstrap"
+	"copy-basta/cmd/copy-basta/bootstrap"
 
 	"copy-basta/cmd/copy-basta/common"
 )

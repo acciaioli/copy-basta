@@ -1,8 +1,6 @@
 package github
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -11,22 +9,6 @@ import (
 
 	"copy-basta/cmd/copy-basta/common/log"
 )
-
-/*
-reference: https://developer.github.com/v3/repos/contents/#get-contents
-*/
-
-const (
-	ContentTypeFile    = "file"
-	ContentEncodingB64 = "base64"
-)
-
-type RepoContent struct {
-	Type     string  `json:"type"`
-	Path     string  `json:"path"`
-	Encoding *string `json:"encoding"`
-	Content  *string `json:"content"`
-}
 
 type Client struct {
 	repoNamespace string
@@ -48,10 +30,6 @@ func NewClient(repoRef string) (*Client, error) {
 		branch:        "master",
 	}
 	return &ghc, nil
-}
-
-func (ghc *Client) ApiContentsURL() string {
-	return fmt.Sprintf("https://api.github.com/repos/%s/%s/contents", ghc.repoNamespace, ghc.repoID)
 }
 
 func (ghc *Client) ZipArchiveURL() string {
@@ -88,61 +66,4 @@ func (ghc *Client) DoGetRequest(url string) (http.Header, []byte, error) {
 	}
 
 	return resp.Header, data, nil
-}
-
-func (ghc *Client) GetContents(path string) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s", ghc.ApiContentsURL(), path)
-	_, data, err := ghc.DoGetRequest(url)
-	return data, err
-}
-
-func (ghc *Client) GetContentsFileData(fpath string) ([]byte, error) {
-	b, err := ghc.GetContents(fpath)
-	if err != nil {
-		log.L.Warn(fmt.Sprintf("failed to find %s in this repo. continuing without it.", fpath))
-		return nil, err
-	}
-
-	var entry RepoContent
-	err = json.Unmarshal(b, &entry)
-	if err != nil {
-		log.L.DebugWithData(
-			"external error", log.Data{"error": err.Error()},
-		)
-		return nil, errors.New("failed to decoded github api json response")
-	}
-	if entry.Type != ContentTypeFile {
-		log.L.DebugWithData(
-			"expected to be a file but ins't", log.Data{"path": entry.Path, "type": entry.Type},
-		)
-		return nil, errors.New("expected github api json response to be a file but ins't")
-	}
-	if entry.Encoding == nil {
-		log.L.DebugWithData(
-			"github content error: nil encoding", log.Data{"path": entry.Path},
-		)
-		return nil, errors.New("failed to get necessary encoding from the github api json response")
-	}
-	if *entry.Encoding != ContentEncodingB64 {
-		log.L.DebugWithData(
-			"github content error: unknown encoding", log.Data{"path": entry.Path, "encoding": entry.Encoding},
-		)
-		return nil, errors.New("failed to get necessary encoding from the github api json response")
-	}
-	if entry.Content == nil {
-		log.L.DebugWithData(
-			"github content error: nil content", log.Data{"path": entry.Path},
-		)
-		return nil, errors.New("failed to get necessary content from the github api json response")
-	}
-
-	decodedContent, err := base64.StdEncoding.DecodeString(*entry.Content)
-	if err != nil {
-		log.L.DebugWithData(
-			"external error", log.Data{"path": entry.Path, "error": err.Error()},
-		)
-		return nil, errors.New("failed decode content from the github api json response")
-	}
-
-	return decodedContent, nil
 }

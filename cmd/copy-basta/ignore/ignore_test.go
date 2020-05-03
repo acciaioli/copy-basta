@@ -21,25 +21,25 @@ starts*
 *mids*
 `
 
-func Test_NewIgnorer(t *testing.T) {
+func Test_newFromReader(t *testing.T) {
 	expectedDirs := []string{
-		"root/my-ignored-tree",
+		"my-ignored-tree",
 	}
 	expectedPatterns := []string{
-		"root/myignoredfile.go",
-		"root/my-ignored-files/*",
-		"root/starts*",
-		"root/*ends",
-		"root/*mids*",
+		"myignoredfile.go",
+		"my-ignored-files/*",
+		"starts*",
+		"*ends",
+		"*mids*",
 	}
-	ignorer, err := New("root", strings.NewReader(testLines))
+	ignorer, err := newFromReader(strings.NewReader(testLines))
 	require.Nil(t, err)
 	require.Equal(t, expectedDirs, ignorer.dirs)
 	require.Equal(t, expectedPatterns, ignorer.patterns)
 }
 
 func Test_Ignorer_ignore(t *testing.T) {
-	ignorer, err := New("root", strings.NewReader(testLines))
+	ignorer, err := newFromReader(strings.NewReader(testLines))
 	require.Nil(t, err)
 
 	tests := []struct {
@@ -49,62 +49,62 @@ func Test_Ignorer_ignore(t *testing.T) {
 	}{
 		{
 			name:     "LoadedFile - ignored",
-			filepath: "root/myignoredfile.go",
+			filepath: "myignoredfile.go",
 			matched:  true,
 		},
 		{
 			name:     "LoadedFile - not ignored",
-			filepath: "root/myfile.go",
+			filepath: "myfile.go",
 			matched:  false,
 		},
 		{
 			name:     "tree - ignored",
-			filepath: "root/my-ignored-tree/LoadedFile.go",
+			filepath: "my-ignored-tree/LoadedFile.go",
 			matched:  true,
 		},
 		{
 			name:     "tree nested - ignored",
-			filepath: "root/my-ignored-tree/nested/LoadedFile.go",
+			filepath: "my-ignored-tree/nested/LoadedFile.go",
 			matched:  true,
 		},
 		{
 			name:     "dir files - ignored",
-			filepath: "root/my-ignored-files/LoadedFile.go",
+			filepath: "my-ignored-files/LoadedFile.go",
 			matched:  true,
 		},
 		{
 			name:     "dir files nested - not ignored",
-			filepath: "root/my-ignored-files/nested/LoadedFile.go",
+			filepath: "my-ignored-files/nested/LoadedFile.go",
 			matched:  false,
 		},
 		{
 			name:     "starts with - ignored",
-			filepath: "root/starts-LoadedFile.go",
+			filepath: "starts-LoadedFile.go",
 			matched:  true,
 		},
 		{
 			name:     "starts with in dir - not ignored",
-			filepath: "root/some-dir/starts-LoadedFile.go",
+			filepath: "some-dir/starts-LoadedFile.go",
 			matched:  false,
 		},
 		{
 			name:     "ends with - ignored",
-			filepath: "root/LoadedFile.go-ends",
+			filepath: "LoadedFile.go-ends",
 			matched:  true,
 		},
 		{
 			name:     "ends with in dir - not ignored",
-			filepath: "root/some-dir/LoadedFile-ends.go",
+			filepath: "some-dir/LoadedFile-ends.go",
 			matched:  false,
 		},
 		{
 			name:     "mids with - ignored",
-			filepath: "root/LoadedFile-mids.go",
+			filepath: "LoadedFile-mids.go",
 			matched:  true,
 		},
 		{
 			name:     "mids with in dir - not ignored",
-			filepath: "root/some-dir/LoadedFile-mids-any.go",
+			filepath: "some-dir/LoadedFile-mids-any.go",
 			matched:  false,
 		},
 	}

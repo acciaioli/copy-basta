@@ -9,9 +9,10 @@ import (
 
 	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/copy-basta/parse"
 )
 
-func Write(destDir string, files []common.File, input common.InputVariables) error {
+func Write(destDir string, files []parse.File, input common.InputVariables) error {
 	err := write(destDir, files, input)
 	if err != nil {
 		cleanup(destDir)
@@ -19,7 +20,7 @@ func Write(destDir string, files []common.File, input common.InputVariables) err
 	return err
 }
 
-func write(destDir string, files []common.File, input common.InputVariables) error {
+func write(destDir string, files []parse.File, input common.InputVariables) error {
 	for _, file := range files {
 		fpath := filepath.Join(destDir, file.Path)
 

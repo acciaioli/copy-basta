@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/parse"
 )
 
 func Test_Integration_Write(t *testing.T) {
@@ -16,7 +16,7 @@ func Test_Integration_Write(t *testing.T) {
 
 	defer func() { _ = os.RemoveAll(root) }()
 
-	files := []common.File{
+	files := []parse.File{
 		{
 			Path:     "simple.md",
 			Mode:     os.ModePerm,

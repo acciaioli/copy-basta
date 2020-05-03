@@ -9,13 +9,11 @@ import (
 	"copy-basta/cmd/copy-basta/clients/github"
 	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
-	"copy-basta/cmd/copy-basta/generate/parse"
-	"copy-basta/cmd/copy-basta/generate/parse/parsediskloader"
-	"copy-basta/cmd/copy-basta/generate/parse/parsegithubloader"
-	"copy-basta/cmd/copy-basta/generate/specification"
-	"copy-basta/cmd/copy-basta/generate/specification/specificationdiskloader"
-	"copy-basta/cmd/copy-basta/generate/specification/specificationgithubloader"
-	"copy-basta/cmd/copy-basta/generate/write"
+	"copy-basta/cmd/copy-basta/ignore"
+	"copy-basta/cmd/copy-basta/load"
+	"copy-basta/cmd/copy-basta/parse"
+	"copy-basta/cmd/copy-basta/specification"
+	"copy-basta/cmd/copy-basta/write"
 )
 
 const (
@@ -41,8 +39,6 @@ type Command struct {
 	dest      string
 	specYAML  string
 	inputYAML string
-
-	ghc *github.Client
 }
 
 func NewCommand() *Command {
@@ -98,22 +94,30 @@ func (cmd *Command) Run() error {
 		return err
 	}
 
-	log.L.Info("loading specification file")
-	specLoader, err := cmd.getSpecificationLoader()
+	log.L.Info("loading template files")
+	loader, err := cmd.getLoader()
 	if err != nil {
 		return err
 	}
-	spec, err := specification.New(specLoader)
+	loadedFiles, err := loader.Load()
+	if err != nil {
+		return err
+	}
+
+	log.L.Info("loading specification")
+	spec, err := specification.New(cmd.specYAML, loadedFiles)
+	if err != nil {
+		return err
+	}
+
+	log.L.Info("loading ignorer")
+	ignorer, err := ignore.New(common.IgnoreFile, loadedFiles)
 	if err != nil {
 		return err
 	}
 
 	log.L.Info("parsing template files")
-	parseLoader, err := cmd.getParseLoader()
-	if err != nil {
-		return err
-	}
-	files, err := parse.Parse(parseLoader)
+	files, err := parse.Parse(ignorer, loadedFiles)
 	if err != nil {
 		return err
 	}
@@ -160,12 +164,6 @@ func (cmd *Command) validate() error {
 	}
 
 	if strings.HasPrefix(cmd.src, common.GithubPrefix) {
-		// remote github
-		ghc, err := github.NewClient(strings.TrimPrefix(cmd.src, common.GithubPrefix))
-		if err != nil {
-			return err
-		}
-		cmd.ghc = ghc
 		// todo: maybe we should rethink how validations are handled
 		log.L.Warn("src is a remote location, skipping validations")
 	} else {
@@ -202,25 +200,18 @@ func (cmd *Command) validate() error {
 	return nil
 }
 
-func (cmd *Command) getParseLoader() (parse.Loader, error) {
+func (cmd *Command) getLoader() (load.Loader, error) {
 	switch {
 	case strings.HasPrefix(cmd.src, common.GithubPrefix):
-		log.L.Debug("using github loader for parsing")
-		return parsegithubloader.New(cmd.ghc)
+		log.L.Debug("using github loader")
+		ghc, err := github.NewClient(strings.TrimPrefix(cmd.src, common.GithubPrefix))
+		if err != nil {
+			return nil, err
+		}
+		return load.NewGithubLoader(ghc)
 	default:
-		log.L.Debug("using disk loader for parsing")
-		return parsediskloader.NewLoader(cmd.src)
-	}
-}
-
-func (cmd *Command) getSpecificationLoader() (specification.Loader, error) {
-	switch {
-	case strings.HasPrefix(cmd.src, common.GithubPrefix):
-		log.L.Debug("using github loader for specification")
-		return specificationgithubloader.New(cmd.specYAML, cmd.ghc)
-	default:
-		log.L.Debug("using disk loader for specification")
-		return specificationdiskloader.New(cmd.specFullPath())
+		log.L.Debug("using disk loader")
+		return load.NewDiskLoader(cmd.src)
 	}
 }
 

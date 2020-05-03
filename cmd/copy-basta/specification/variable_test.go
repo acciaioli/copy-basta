@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newSpecVar(t openAPIType) SpecVariable {
-	return SpecVariable{
+func newSpecVar(t openAPIType) Variable {
+	return Variable{
 		Type: &t,
 	}
 }
@@ -15,7 +15,7 @@ func newSpecVar(t openAPIType) SpecVariable {
 func Test_SpecVariable_valueOK(t *testing.T) {
 	tests := []struct {
 		name    string
-		specVar SpecVariable
+		specVar Variable
 		value   interface{}
 	}{
 		{
@@ -55,7 +55,7 @@ func Test_SpecVariable_valueOK(t *testing.T) {
 		},
 		{
 			name: "missing type",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Type: nil,
 			},
 			value: "any value would do",
@@ -73,7 +73,7 @@ func Test_SpecVariable_valueOK(t *testing.T) {
 func Test_SpecVariable_valueOK_error(t *testing.T) {
 	tests := []struct {
 		name    string
-		specVar SpecVariable
+		specVar Variable
 		value   interface{}
 	}{
 		{
@@ -124,11 +124,11 @@ func Test_SpecVariable_valueOK_error(t *testing.T) {
 func Test_SpecVariable_validate(t *testing.T) {
 	tests := []struct {
 		name    string
-		specVar SpecVariable
+		specVar Variable
 	}{
 		{
 			name: "simple",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "simple",
 				Type:        nil,
 				Default:     nil,
@@ -137,7 +137,7 @@ func Test_SpecVariable_validate(t *testing.T) {
 		},
 		{
 			name: "complete",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "complete",
 				Type:        func() *openAPIType { v := openAPIInteger; return &v }(),
 				Default:     2289,
@@ -157,11 +157,11 @@ func Test_SpecVariable_validate(t *testing.T) {
 func Test_SpecVariable_validate_error(t *testing.T) {
 	tests := []struct {
 		name    string
-		specVar SpecVariable
+		specVar Variable
 	}{
 		{
 			name: "missing name",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Type:        func() *openAPIType { v := openAPIBoolean; return &v }(),
 				Default:     nil,
 				Description: nil,
@@ -169,7 +169,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 		},
 		{
 			name: "invalid type",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "myName",
 				Type:        func() *openAPIType { v := openAPIType("notValid"); return &v }(),
 				Default:     nil,
@@ -178,7 +178,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 		},
 		{
 			name: "invalid default",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "myName",
 				Type:        func() *openAPIType { v := openAPIBoolean; return &v }(),
 				Default:     44,
@@ -200,12 +200,12 @@ func Test_SpecVariable_prompt(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		specVar    SpecVariable
+		specVar    Variable
 		expectedIn []string
 	}{
 		{
 			name: "simple",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "myVariable",
 				Type:        &myType,
 				Default:     nil,
@@ -215,7 +215,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 		},
 		{
 			name: "with default",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "myVariable",
 				Type:        &myType,
 				Default:     "myDefault",
@@ -225,7 +225,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 		},
 		{
 			name: "with description",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "myVariable",
 				Type:        &myType,
 				Default:     nil,
@@ -235,7 +235,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 		},
 		{
 			name: "with default and description",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "myVariable",
 				Type:        &myType,
 				Default:     "myDefault",
@@ -245,7 +245,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 		},
 		{
 			name: "no type",
-			specVar: SpecVariable{
+			specVar: Variable{
 				Name:        "myVariable",
 				Type:        nil,
 				Default:     "myDefault",
@@ -269,7 +269,7 @@ func Test_SpecVariable_prompt(t *testing.T) {
 func Test_SpecVariable_process(t *testing.T) {
 	tests := []struct {
 		name          string
-		specVar       SpecVariable
+		specVar       Variable
 		text          string
 		expectedValue interface{}
 	}{
@@ -313,7 +313,7 @@ func Test_SpecVariable_process(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			value, err := tt.specVar.process(tt.text)
+			value, err := tt.specVar.fromString(tt.text)
 			require.Nil(t, err)
 			require.Equal(t, tt.expectedValue, value)
 		})

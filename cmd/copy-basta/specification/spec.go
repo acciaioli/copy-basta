@@ -13,10 +13,11 @@ import (
 
 	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/copy-basta/load"
 )
 
 type Spec struct {
-	Variables []SpecVariable `yaml:"variables"`
+	Variables []Variable `yaml:"variables"`
 }
 
 func (spec *Spec) validate() error {
@@ -29,16 +30,19 @@ func (spec *Spec) validate() error {
 	return nil
 }
 
-type Loader interface {
-	LoadReader() (io.Reader, error)
-}
-
-func New(loader Loader) (*Spec, error) {
-	r, err := loader.LoadReader()
-	if err != nil {
-		return nil, err
+func New(specFileName string, files []load.File) (*Spec, error) {
+	var specFile *load.File
+	for _, f := range files {
+		if f.Path == specFileName {
+			specFile = &f
+			break
+		}
 	}
-	return newFromReader(r)
+	if specFile == nil {
+		return nil, fmt.Errorf("specification: failed to find spec file (%s)", specFileName)
+	}
+
+	return newFromReader(specFile.Reader)
 }
 
 func newFromReader(r io.Reader) (*Spec, error) {
@@ -87,25 +91,33 @@ func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
 	fmt.Print("\n")
 	inputVars := common.InputVariables{}
 	for _, v := range spec.Variables {
-		userInput, err := promptLoop(r, v)
-		if err != nil {
-			return nil, err
-		}
-
-		if userInput != nil {
-			value, err := v.process(*userInput)
+		for retry := 3; retry > 0; retry-- {
+			userInput, err := promptLoop(r, v)
 			if err != nil {
 				return nil, err
 			}
-			inputVars[v.Name] = value
-		} else {
-			inputVars[v.Name] = v.Default
+
+			if userInput != nil {
+				value, err := v.fromString(*userInput)
+				if err != nil {
+					if retry > 1 {
+						fmt.Println(v.Help())
+						continue
+					}
+					return nil, err
+				}
+				inputVars[v.Name] = value
+			} else {
+				inputVars[v.Name] = v.Default
+			}
+			break
 		}
+
 	}
 	return inputVars, nil
 }
 
-func promptLoop(r *bufio.Reader, v SpecVariable) (*string, error) {
+func promptLoop(r *bufio.Reader, v Variable) (*string, error) {
 	for {
 		fmt.Print(v.prompt())
 		userInput, err := r.ReadString('\n')
