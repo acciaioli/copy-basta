@@ -97,7 +97,7 @@ func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
 		}
 
 		if userInput != nil {
-			value, err := v.process(*userInput)
+			value, err := v.fromString(*userInput)
 			if err != nil {
 				return nil, err
 			}

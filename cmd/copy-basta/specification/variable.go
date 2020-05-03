@@ -136,10 +136,19 @@ func (v *Variable) prompt() string {
 	sBuilder.WriteString("\n")
 
 	if v.Default != nil {
+		defaultS, err := v.toString(v.Default)
+		if err != nil {
+			log.L.DebugWithData(
+				`could not convert default value to string. 
+This is probably due to a limitation of the current implementation.`,
+				log.Data{"name": v.Name, "type": *v.Type, "value": v.Default},
+			)
+			defaultS = fmt.Sprintf("%v", v.Default)
+		}
 		coloredDefault := common.ColoredFormat(
-			common.ColorOrange, common.TextFormatNormal, common.BGColorNone, fmt.Sprintf("%v", v.Default),
+			common.ColorOrange, common.TextFormatNormal, common.BGColorNone, defaultS,
 		)
-		sBuilder.WriteString(fmt.Sprintf("%s %s [%v]    ", qMark, coloredName, coloredDefault))
+		sBuilder.WriteString(fmt.Sprintf("%s %s [%s]    ", qMark, coloredName, coloredDefault))
 	} else {
 		sBuilder.WriteString(fmt.Sprintf("%s %s    ", qMark, coloredName))
 	}
@@ -147,7 +156,7 @@ func (v *Variable) prompt() string {
 	return sBuilder.String()
 }
 
-func (v *Variable) process(s string) (interface{}, error) {
+func (v *Variable) fromString(s string) (interface{}, error) {
 	if v.Type == nil {
 		return s, nil
 	}
@@ -187,4 +196,47 @@ only open-api types are supported (https://swagger.io/docs/specification/data-mo
 		err = fmt.Errorf("variable value error: failed to parse string-value %s, open-api type is %s", value, *v.Type)
 	}
 	return value, err
+}
+
+func (v *Variable) toString(value interface{}) (string, error) {
+	if v.Type == nil {
+		log.L.DebugWithData("toString on any defaults yo internal representation", log.Data{"value": value})
+		return fmt.Sprintf("%v", value), nil
+	}
+	switch *v.Type {
+	case openAPIString:
+		fallthrough
+	case openAPINumber:
+		fallthrough
+	case openAPIInteger:
+		fallthrough
+	case openAPIBoolean:
+		return fmt.Sprintf("%v", value), nil
+	case openAPIArray:
+		vArray, ok := value.([]interface{})
+		if !ok {
+			log.L.DebugWithData("toString value type consistency error", log.Data{"type": *v.Type, "value": value})
+			return "", fmt.Errorf("variable error: provided value inconsistent with variable type")
+		}
+		var items []string
+		for _, item := range vArray {
+			items = append(items, fmt.Sprintf("%v", item))
+		}
+		return strings.Join(items, ","), nil
+	case openAPIObject:
+		vMap, ok := value.(map[interface{}]interface{})
+		if !ok {
+			log.L.DebugWithData("toString value type consistency error", log.Data{"type": *v.Type, "value": value})
+			return "", fmt.Errorf("variable error: provided value inconsistent with variable type")
+		}
+		var items []string
+		for key, item := range vMap {
+			items = append(items, fmt.Sprintf("%v=%v", key, item))
+		}
+		return strings.Join(items, ","), nil
+	default:
+		log.L.DebugWithData("default case should not run", log.Data{"name": v.Name})
+		return "", fmt.Errorf(`variable error: %s is not a valid type. 
+only open-api types are supported (https://swagger.io/docs/specification/data-models/data-types)`, *v.Type)
+	}
 }

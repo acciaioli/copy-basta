@@ -313,7 +313,7 @@ func Test_SpecVariable_process(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			value, err := tt.specVar.process(tt.text)
+			value, err := tt.specVar.fromString(tt.text)
 			require.Nil(t, err)
 			require.Equal(t, tt.expectedValue, value)
 		})
