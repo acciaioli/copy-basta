@@ -28,11 +28,11 @@ func Test_GithubLoader_Load(t *testing.T) {
 
 	for _, file := range files {
 		switch file.Path {
-		case "server-basta-template-master/.gitignore":
+		case ".gitignore":
 			gitIgnoreFound = true
-		case "server-basta-template-master/Makefile.basta":
+		case "Makefile.basta":
 			makefileFound = true
-		case "server-basta-template-master/main.go.basta":
+		case "main.go.basta":
 			mainFound = true
 		default:
 			require.NotEqual(t, "", file.Path)
