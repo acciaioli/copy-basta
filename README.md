@@ -8,6 +8,7 @@
 - [Install](#install)
 - [How to stop copy pasting](#how-to-stop-copy-pasting)
 - [Quick Start](#quick-start)
+- [Template Project Documentation](#template-project-documentation)
 - [RoadMap](#roadmap)
 
 
@@ -175,19 +176,6 @@ hello Chi!
 ```
 
 ---
-## RoadMap
-
-- proper support for `array` and `object` types (including input prompts)
-- generate from remote location (--src=https://github.com/acciaioli/example-template)
-- deal with variables with dashes (this needs to be forbidden or worked around, no good for go templates)
-- code documentation
-- cli documentation
-- heathcheck command (quickly tests the template, for a dev friendly experience)
-- support install via snap, apt, brew, etc...
-- enable different templating languages
-
-
----
 ## Template Project Documentation
 
 Every file in your template is either a `static file` or a `template file`.
@@ -299,3 +287,14 @@ ignored_file.txt
 ignored_pattern*
 *.
 ```
+
+---
+## RoadMap
+
+- proper support for `array` and `object` types (including input prompts)
+- deal with variables with dashes (this needs to be forbidden or worked around, no good for go text/templates)
+- code documentation
+- cli documentation
+- heathcheck command (quickly tests the template, for a dev friendly experience)
+- support install via snap, apt, brew, etc...
+- enable different templating languages
