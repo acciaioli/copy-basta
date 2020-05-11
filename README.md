@@ -1,7 +1,7 @@
 # copy-basta
 
-[![Build Status](https://travis-ci.com/Spin14/copy-basta.svg?branch=master)](https://travis-ci.com/Spin14/copy-basta)
-[![Go Report Card](https://goreportcard.com/badge/github.com/Spin14/copy-basta)](https://goreportcard.com/report/github.com/Spin14/copy-basta)
+[![Build Status](https://travis-ci.com/acciaioli/copy-basta.svg?branch=master)](https://travis-ci.com/acciaioli/copy-basta)
+[![Go Report Card](https://goreportcard.com/badge/github.com/acciaioli/copy-basta)](https://goreportcard.com/report/github.com/acciaioli/copy-basta)
 
 
 - [Intro](#intro)
