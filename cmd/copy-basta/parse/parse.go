@@ -1,18 +1,18 @@
 package parse
 
 import (
+	"copy-basta/cmd/copy-basta/load"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
-	"strings"
-
-	"copy-basta/cmd/copy-basta/common"
-	"copy-basta/cmd/copy-basta/load"
 )
 
 type ignorer interface {
 	Ignore(string) bool
+}
+
+type passer interface {
+	Pass(string) bool
 }
 
 type File struct {
@@ -22,13 +22,13 @@ type File struct {
 	Content  []byte
 }
 
-func Parse(ignorer ignorer, loadedFiles []load.File) ([]File, error) {
+func Parse(ignorer ignorer, passer passer, loadedFiles []load.File) ([]File, error) {
 	err := validateFiles(loadedFiles)
 	if err != nil {
 		return nil, err
 	}
 
-	files, err := processFiles(ignorer, loadedFiles)
+	files, err := processFiles(ignorer, passer, loadedFiles)
 	if err != nil {
 		return nil, err
 	}
@@ -49,44 +49,23 @@ func validateFiles(files []load.File) error {
 	return nil
 }
 
-func processFiles(ignorer ignorer, loadedFiles []load.File) ([]File, error) {
+func processFiles(ignorer ignorer, passer passer, loadedFiles []load.File) ([]File, error) {
 	var files []File
 	for _, loadedFile := range loadedFiles {
 		if ignorer.Ignore(loadedFile.Path) {
 			continue
 		}
-		file, err := processFile(loadedFile)
+		content, err := ioutil.ReadAll(loadedFile.Reader)
 		if err != nil {
 			return nil, err
 		}
-		files = append(files, *file)
+
+		files = append(files, File{
+			Path:     loadedFile.Path,
+			Mode:     loadedFile.Mode,
+			Template: !passer.Pass(loadedFile.Path),
+			Content:  content,
+		})
 	}
 	return files, nil
-}
-
-func processFile(loadedFile load.File) (*File, error) {
-	content, err := ioutil.ReadAll(loadedFile.Reader)
-	if err != nil {
-		return nil, err
-	}
-
-	if path.Ext(loadedFile.Path) == common.TemplateExtension {
-		return &File{
-			Path:     trimExtension(loadedFile.Path),
-			Mode:     loadedFile.Mode,
-			Template: true,
-			Content:  content,
-		}, nil
-	}
-
-	return &File{
-		Path:     loadedFile.Path,
-		Mode:     loadedFile.Mode,
-		Template: false,
-		Content:  content,
-	}, nil
-}
-
-func trimExtension(s string) string {
-	return strings.TrimSuffix(s, common.TemplateExtension)
 }

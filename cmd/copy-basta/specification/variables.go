@@ -29,6 +29,17 @@ const (
 	openAPIObject  = openAPIType("object")
 )
 
+type Variables []Variable
+
+func (vars Variables) validate() error {
+	for _, v := range vars {
+		if err := v.validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type Variable struct {
 	Name        string       `yaml:"name"`
 	Type        *openAPIType `yaml:"type"`

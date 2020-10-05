@@ -17,14 +17,20 @@ import (
 )
 
 type Spec struct {
-	Variables []Variable `yaml:"variables"`
+	Ignore Ignore `yaml:"ignore"`
+	PassThrough PassThrough `yaml:"pass-through"`
+	Variables Variables `yaml:"variables"`
 }
 
 func (spec *Spec) validate() error {
-	for _, v := range spec.Variables {
-		if err := v.validate(); err != nil {
-			return fmt.Errorf("variables error: %s", err.Error())
-		}
+	if err := spec.Ignore.validate(); err != nil {
+		return fmt.Errorf("ignore error: %s", err.Error())
+	}
+	if err := spec.PassThrough.validate(); err != nil {
+		return fmt.Errorf("pass-through error: %s", err.Error())
+	}
+	if err := spec.Variables.validate(); err != nil {
+		return fmt.Errorf("variables error: %s", err.Error())
 	}
 
 	return nil
