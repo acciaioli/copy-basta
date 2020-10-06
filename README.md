@@ -49,7 +49,7 @@ Use "copy-basta [command] --help" for more information about a command.
 
 ### Binary Releases
 
-For Linux, Mac and Windows binary releases are [vailable here](https://github.com/acciaioli/copy-basta/releases).
+For Linux, Mac and Windows binary releases are [available here](https://github.com/acciaioli/copy-basta/releases).
 
 #### Using go (compile source code)
 
@@ -78,13 +78,17 @@ Once we have one, we can use the `copy-basta` cli tool to create new projects.
 
 ##### What goes into the template project?
 
-1. `static files`.
-By default, a file is a `static file`.
-When generating a new project, these will just be copied to the new project, not questions asked.
-Good example of files that are likely static: `.gitignore`, `a-linter-config.yaml`
+1. `basta.yaml`.
+This `YAML`  is essentially the template configuration.
+It specifies ignored files, pass-through files and expected template variables.
+This file is required to generate new projects from your template project.
 
-1. `spec.yaml`.
-This `YAML` file defines the variables that the template needs to generate a new project.
+1. `project files`.
+By default, `project files` are treated as [go text templates](https://golang.org/pkg/text/template).
+When generating a new project, these files will be processed and placeholders will be replaced with values. 
+Alternatively, files can be ignored or passed-through.
+
+
 
 1. `basta files`.
 Files with the `.basta` extension are template files.

@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"copy-basta/cmd/copy-basta/common/log"
-
 	"copy-basta/cmd/copy-basta/bootstrap"
-
 	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/common/log"
 )
 
 const (

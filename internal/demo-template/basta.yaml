@@ -1,4 +1,11 @@
 ---
+ignore:
+  - source/panics.go
+  - basta.yaml
+
+pass-through:
+  - source/untouched.md
+
 variables:
   - name: goModule
     type: string

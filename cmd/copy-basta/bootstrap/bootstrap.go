@@ -1,13 +1,11 @@
 package bootstrap
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
-	"copy-basta/cmd/copy-basta/common/log"
-
 	"copy-basta/cmd/copy-basta/common"
+	"copy-basta/cmd/copy-basta/common/log"
 )
 
 func Bootstrap(destDir string) error {
@@ -24,11 +22,6 @@ func bootstrap(destDir string) error {
 		return err
 	}
 
-	_, err = bootstrapFile(destDir, common.IgnoreFile, ignoreText)
-	if err != nil {
-		return err
-	}
-
 	_, err = bootstrapFile(destDir, readmeFileName, readmeText)
 	if err != nil {
 		return err
@@ -39,7 +32,7 @@ func bootstrap(destDir string) error {
 		return err
 	}
 
-	scriptFile, err := bootstrapFile(destDir, fmt.Sprintf("%s%s", scriptFileName, common.TemplateExtension), scriptText)
+	scriptFile, err := bootstrapFile(destDir, scriptFileName, scriptText)
 	if err != nil {
 		return err
 	}
@@ -71,30 +64,27 @@ func cleanup(destDir string) {
 }
 
 const (
-	ignoreText = `
-# ignored dirs
-.git/
-
-# ignored patterns
-readme.md
-.bastaignore
-spec.yaml
-`
 	readmeFileName = "readme.md"
 	readmeText     = `# template
 
 This is the readme of the template. 
 
-It will not be copied because it is featured in the .bastaignore file.
+It will not be copied to generated projects because
+it is featured in the _ignore_ section of the specification file.
 
 To generate a project from this template you should run:
-*copy-basta generate --src=template-dir --src=new-project*
+_copy-basta generate --src=template-dir --src=new-project_
 
-*--src* should be the directory containing this file
+_--src_ should be the directory containing this file
 
 You should override this file with information that is relevant for your template!
 `
 	specText = `---
+ignore:
+  - .git/
+  - readme.md
+  - basta.yaml
+
 variables:
   - name: myName
     type: string
@@ -107,6 +97,7 @@ variables:
 	scriptFileName      = "main.sh"
 	scriptFileChmodCode = 0777
 	scriptText          = `#!/bin/sh
+
 # Your generated code bellow
 echo {{.greet}} {{.myName}}!
 `

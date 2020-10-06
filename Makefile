@@ -69,7 +69,6 @@ demo-init: install
 	@ rm -rf $(gen)
 	@ copy-basta generate --src=$(tmpl) --dest=$(gen)
 	@ sh $(exec)
-	@ echo "check the generated demo project source code @ $(gen)"
 	@ echo ">> done"
 
 demo-logs: install
