@@ -50,7 +50,7 @@ Use "copy-basta [command] --help" for more information about a command.
 
 For Linux, Mac and Windows binary releases are [available here](https://github.com/acciaioli/copy-basta/releases).
 
-#### From the source (using `go`)
+#### Source code (using `go`)
 
 ```
 ▶ git clone git@github.com:acciaioli/copy-basta.git
@@ -203,4 +203,19 @@ Our new project is ready!
 ▶ cd new-project
 ▶ ./main.sh
 hello Chi!
+```
+
+
+## Examples
+
+### Gorilla Mux Hello World
+
+```
+▶ copy-basta generate \
+    --src=https://github.com/acciaioli/gorilla-mux-hello-world-basta-template \
+    --dest=my-service
+...
+▶ cd my-service
+▶ go run main.go
+Starting up on 8000
 ```
