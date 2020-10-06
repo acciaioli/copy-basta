@@ -8,18 +8,20 @@
 - [Install](#install)
 - [Template specification](#template-specification)
 - [Quick Start](#quick-start)
+- [Examples](#examples)
 
 ---
 ## Intro
 
 `copy-basta` is templating command line interface (cli) tool.
-It aims to support the usage of template code bases with well defined inputs and outputs.
+
+It helps managing and using usage template projects with well defined inputs and outputs.
 
 The cli is written in `go` and only [golang's text/template](https://golang.org/pkg/text/template) are supported.
 This doesn't mean that you need to know `go` to use this tool, it just means that you need to use golang's templating language
 in your template files.
 
-The only thing you need to use this tool is a `basta.yaml` file alongside your template files.
+The only opinionated thing you need to in order to use this tool is a `basta.yaml` file alongside your template files.
 
 ```
 Basta! Stop copying.
@@ -116,9 +118,9 @@ variables:
 #### More on Variables
 
 ##### `variable.name`
-For each variable, only the `name` is required.
+The `name` identifies the variable. It should be featured in at least on template file.
 
-The `name` is are the variable name in our templates.
+The `name` is only required field of a variable.
 
 ##### `variable.type`
 If provided, it should be an [open API 3.0 type](https://swagger.io/docs/specification/data-models/data-types).
@@ -130,6 +132,7 @@ When the variable type is not specified type checks are skipped.
 ##### `variable.description`
 
 The description of the variable.
+
 This helps users when they are generating a new project.
 
 ##### `variable.default`
