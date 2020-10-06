@@ -29,74 +29,53 @@ func Test_validate_err(t *testing.T) {
 	require.NotNil(t, err)
 }
 
-type testIgnorer struct {
-	paths []string
-}
+type testIgnorer struct{}
 
 func (i *testIgnorer) Ignore(s string) bool {
-	for _, p := range i.paths {
-		if s == p {
-			return true
-		}
-	}
-	return false
+	return strings.Contains(s, "ignore")
+}
+
+type testPasser struct{}
+
+func (i *testPasser) Pass(s string) bool {
+	return strings.Contains(s, "pass")
 }
 
 func Test_processFiles(t *testing.T) {
-	i := testIgnorer{paths: []string{"a.go", "d.python"}}
 	loadedFiles := []load.File{
 		{
-			Path:   "a.go",
+			Path:   "ignore.go",
 			Mode:   0123,
-			Reader: strings.NewReader("a.go"),
+			Reader: strings.NewReader("ignore.go"),
 		},
 		{
-			Path:   "b.go",
+			Path:   "pass.go",
 			Mode:   0123,
-			Reader: strings.NewReader("b.go"),
+			Reader: strings.NewReader("pass.go"),
 		},
 		{
-			Path:   "c.go.basta",
+			Path:   "template.cpp",
 			Mode:   0123,
-			Reader: strings.NewReader("c.go.basta"),
+			Reader: strings.NewReader("template.cpp"),
 		},
 	}
 
 	expectedFiles := []File{
 		{
-			Path:     "b.go",
+			Path:     "pass.go",
 			Mode:     0123,
-			Content:  []byte("b.go"),
+			Content:  []byte("pass.go"),
 			Template: false,
 		},
 		{
-			Path:     "c.go",
+			Path:     "template.cpp",
 			Mode:     0123,
-			Content:  []byte("c.go.basta"),
+			Content:  []byte("template.cpp"),
 			Template: true,
 		},
 	}
 
-	files, err := processFiles(&i, loadedFiles)
+	files, err := processFiles(&testIgnorer{}, &testPasser{}, loadedFiles)
 	require.Nil(t, err)
 	require.Equal(t, expectedFiles, files)
-}
-
-func Test_trimExtension(t *testing.T) {
-	tests := []struct {
-		name     string
-		in       string
-		expected string
-	}{
-		{name: "simple", in: "example.txt", expected: "example.txt"},
-		{name: ".txt", in: "example.txt.basta", expected: "example.txt"},
-		{name: ".go", in: "example.go.basta", expected: "example.go"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			out := trimExtension(tt.in)
-			require.Equal(t, out, tt.expected)
-		})
-	}
 }

@@ -1,9 +1,7 @@
 package common
 
 const (
-	IgnoreFile        = ".bastaignore"
-	SpecFile          = "spec.yaml"
-	TemplateExtension = ".basta"
+	SpecFile = "basta.yaml"
 
 	GithubPrefix = "https://github.com/"
 )

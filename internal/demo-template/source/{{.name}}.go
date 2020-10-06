@@ -1,16 +1,16 @@
 package source
 
 import (
-    "fmt"
+	"fmt"
 )
 
 func GetDescription() string {
-    return fmt.Sprintf("%s%s",newMsg,`
+	return fmt.Sprintf("%s%s", newMsg, `
 
-The name is {{.name}}, and they are {{.age}} years old. Their list of interests includes:
+My name is {{.name}}, and I am {{.age}} years old. I like:
 {{define "interestsList"}}- {{.}}{{end}}{{range $i := .interests}}
     {{template "interestsList" $i}}
 {{end}}
-On their own yours: "{{.quote}}"
+This is my favorite quote: "{{.quote}}"
 `)
 }

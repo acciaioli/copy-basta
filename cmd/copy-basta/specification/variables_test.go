@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newSpecVar(t openAPIType) Variable {
+func newSpecVar(t string) Variable {
 	return Variable{
-		Type: &t,
+		dtype: &t,
 	}
 }
 
@@ -56,7 +56,7 @@ func Test_SpecVariable_valueOK(t *testing.T) {
 		{
 			name: "missing type",
 			specVar: Variable{
-				Type: nil,
+				dtype: nil,
 			},
 			value: "any value would do",
 		},
@@ -129,19 +129,19 @@ func Test_SpecVariable_validate(t *testing.T) {
 		{
 			name: "simple",
 			specVar: Variable{
-				Name:        "simple",
-				Type:        nil,
-				Default:     nil,
-				Description: nil,
+				name:        "simple",
+				dtype:       nil,
+				defaultVal:  nil,
+				description: nil,
 			},
 		},
 		{
 			name: "complete",
 			specVar: Variable{
-				Name:        "complete",
-				Type:        func() *openAPIType { v := openAPIInteger; return &v }(),
-				Default:     2289,
-				Description: func() *string { s := "a legit integer"; return &s }(),
+				name:        "complete",
+				dtype:       func() *string { v := openAPIInteger; return &v }(),
+				defaultVal:  2289,
+				description: func() *string { s := "a legit integer"; return &s }(),
 			},
 		},
 	}
@@ -162,27 +162,27 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 		{
 			name: "missing name",
 			specVar: Variable{
-				Type:        func() *openAPIType { v := openAPIBoolean; return &v }(),
-				Default:     nil,
-				Description: nil,
+				dtype:       func() *string { v := openAPIBoolean; return &v }(),
+				defaultVal:  nil,
+				description: nil,
 			},
 		},
 		{
 			name: "invalid type",
 			specVar: Variable{
-				Name:        "myName",
-				Type:        func() *openAPIType { v := openAPIType("notValid"); return &v }(),
-				Default:     nil,
-				Description: nil,
+				name:        "myName",
+				dtype:       func() *string { v := "notValid"; return &v }(),
+				defaultVal:  nil,
+				description: nil,
 			},
 		},
 		{
 			name: "invalid default",
 			specVar: Variable{
-				Name:        "myName",
-				Type:        func() *openAPIType { v := openAPIBoolean; return &v }(),
-				Default:     44,
-				Description: func() *string { s := "a boolean, therefore not a integer"; return &s }(),
+				name:        "myName",
+				dtype:       func() *string { v := openAPIBoolean; return &v }(),
+				defaultVal:  44,
+				description: func() *string { s := "a boolean, therefore not a integer"; return &s }(),
 			},
 		},
 	}
@@ -196,7 +196,7 @@ func Test_SpecVariable_validate_error(t *testing.T) {
 }
 
 func Test_SpecVariable_prompt(t *testing.T) {
-	myType := openAPIType("myType")
+	myType := "myType"
 
 	tests := []struct {
 		name       string
@@ -206,50 +206,50 @@ func Test_SpecVariable_prompt(t *testing.T) {
 		{
 			name: "simple",
 			specVar: Variable{
-				Name:        "myVariable",
-				Type:        &myType,
-				Default:     nil,
-				Description: nil,
+				name:        "myVariable",
+				dtype:       &myType,
+				defaultVal:  nil,
+				description: nil,
 			},
 			expectedIn: []string{"myType", "?", "myVariable"},
 		},
 		{
 			name: "with default",
 			specVar: Variable{
-				Name:        "myVariable",
-				Type:        &myType,
-				Default:     "myDefault",
-				Description: nil,
+				name:        "myVariable",
+				dtype:       &myType,
+				defaultVal:  "myDefault",
+				description: nil,
 			},
 			expectedIn: []string{"myType", "?", "myVariable", "myDefault"},
 		},
 		{
 			name: "with description",
 			specVar: Variable{
-				Name:        "myVariable",
-				Type:        &myType,
-				Default:     nil,
-				Description: func() *string { s := "my template variable description 1"; return &s }(),
+				name:        "myVariable",
+				dtype:       &myType,
+				defaultVal:  nil,
+				description: func() *string { s := "my template variable description 1"; return &s }(),
 			},
 			expectedIn: []string{"my template variable description 1", "myType", "?", "myVariable"},
 		},
 		{
 			name: "with default and description",
 			specVar: Variable{
-				Name:        "myVariable",
-				Type:        &myType,
-				Default:     "myDefault",
-				Description: func() *string { s := "my template variable description 2"; return &s }(),
+				name:        "myVariable",
+				dtype:       &myType,
+				defaultVal:  "myDefault",
+				description: func() *string { s := "my template variable description 2"; return &s }(),
 			},
 			expectedIn: []string{"my template variable description 2", "myType", "?", "myVariable", "myDefault"},
 		},
 		{
 			name: "no type",
 			specVar: Variable{
-				Name:        "myVariable",
-				Type:        nil,
-				Default:     "myDefault",
-				Description: func() *string { s := "my template variable description 3"; return &s }(),
+				name:        "myVariable",
+				dtype:       nil,
+				defaultVal:  "myDefault",
+				description: func() *string { s := "my template variable description 3"; return &s }(),
 			},
 			expectedIn: []string{"my template variable description 3", "?", "myVariable", "myDefault"},
 		},

@@ -6,6 +6,11 @@ set -e
 declare -a GOOS=("darwin" "linux" "windows")
 declare -a GOARCH=("386" "amd64")
 
+if [[ -z "${VERSION}" ]]; then
+  echo "VERSION environment variable not exported"
+  exit 1
+fi
+
 for goos in "${GOOS[@]}"; do
   for goarch in "${GOARCH[@]}"; do
     bin="bin/copy-basta.$goos-$goarch"
