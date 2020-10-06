@@ -86,7 +86,7 @@ ignore:
   - basta.yaml
 
 variables:
-  - name: myName
+  - name: name
     type: string
     description: your name so that you can be greeted
   - name: greet
@@ -99,6 +99,6 @@ variables:
 	scriptText          = `#!/bin/sh
 
 # Your generated code bellow
-echo {{.greet}} {{.myName}}!
+echo {{.greet}} {{.name}}!
 `
 )
