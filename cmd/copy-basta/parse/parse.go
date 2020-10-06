@@ -1,10 +1,11 @@
 package parse
 
 import (
-	"copy-basta/cmd/copy-basta/load"
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"copy-basta/cmd/copy-basta/load"
 )
 
 type ignorer interface {
