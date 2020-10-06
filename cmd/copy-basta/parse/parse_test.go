@@ -32,7 +32,7 @@ func Test_validate_err(t *testing.T) {
 type testIgnorer struct{}
 
 func (i *testIgnorer) Ignore(s string) bool {
-	return strings.Contains(s, "ingore")
+	return strings.Contains(s, "ignore")
 }
 
 type testPasser struct{}
@@ -62,15 +62,15 @@ func Test_processFiles(t *testing.T) {
 
 	expectedFiles := []File{
 		{
-			Path:     "b.go",
+			Path:     "pass.go",
 			Mode:     0123,
-			Content:  []byte("b.go"),
+			Content:  []byte("pass.go"),
 			Template: false,
 		},
 		{
-			Path:     "c.go",
+			Path:     "template.cpp",
 			Mode:     0123,
-			Content:  []byte("c.go.basta"),
+			Content:  []byte("template.cpp"),
 			Template: true,
 		},
 	}

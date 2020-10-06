@@ -1,39 +1,20 @@
 package specification
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
-	"strings"
 
 	"gopkg.in/yaml.v2"
 
-	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
 	"copy-basta/cmd/copy-basta/load"
 )
 
 type Spec struct {
-	Ignore Ignore `yaml:"ignore"`
-	PassThrough PassThrough `yaml:"pass-through"`
-	Variables Variables `yaml:"variables"`
-}
-
-func (spec *Spec) validate() error {
-	if err := spec.Ignore.validate(); err != nil {
-		return fmt.Errorf("ignore error: %s", err.Error())
-	}
-	if err := spec.PassThrough.validate(); err != nil {
-		return fmt.Errorf("pass-through error: %s", err.Error())
-	}
-	if err := spec.Variables.validate(); err != nil {
-		return fmt.Errorf("variables error: %s", err.Error())
-	}
-
-	return nil
+	Ignorer   *Ignorer
+	Passer    *Passer
+	Variables Variables
 }
 
 func New(specFileName string, files []load.File) (*Spec, error) {
@@ -52,94 +33,31 @@ func New(specFileName string, files []load.File) (*Spec, error) {
 }
 
 func newFromReader(r io.Reader) (*Spec, error) {
-	spec := Spec{}
-	if err := yaml.NewDecoder(r).Decode(&spec); err != nil {
+	data := specData{}
+	err := yaml.NewDecoder(r).Decode(&data)
+	if err != nil {
 		log.L.DebugWithData("external error", log.Data{"error": err.Error()})
 		return nil, errors.New("specification yaml file error: failed to decode yaml")
 	}
 
-	if err := spec.validate(); err != nil {
-		return nil, fmt.Errorf("specification yaml file error: %s", err.Error())
-	}
-	return &spec, nil
-}
-
-func (spec *Spec) InputFromFile(inputYAML string) (common.InputVariables, error) {
-	yamlFile, err := ioutil.ReadFile(inputYAML)
+	ignorer, err := NewIgnorer(data.Ignore)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ignorer error: %s", err.Error())
 	}
 
-	input := common.InputVariables{}
-	err = yaml.Unmarshal(yamlFile, &input)
+	passer, err := NewPasser(data.PassThrough)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("passer error: %s", err.Error())
 	}
 
-	for _, v := range spec.Variables {
-		value, ok := input[v.Name]
-		if !ok {
-			if v.Default != nil {
-				return nil, fmt.Errorf("no value nor default for %s", v.Name)
-			}
-			input[v.Name] = v.Default
-		}
-		if err := v.valueOk(value); err != nil {
-			return nil, err
-		}
+	variables, err := NewVariables(data.Variables)
+	if err != nil {
+		return nil, fmt.Errorf("variables error: %s", err.Error())
 	}
 
-	return input, nil
-}
-
-func (spec *Spec) InputFromStdIn() (common.InputVariables, error) {
-	r := bufio.NewReader(os.Stdin)
-	fmt.Print("\n")
-	inputVars := common.InputVariables{}
-	for _, v := range spec.Variables {
-		for retry := 3; retry > 0; retry-- {
-			userInput, err := promptLoop(r, v)
-			if err != nil {
-				return nil, err
-			}
-
-			if userInput != nil {
-				value, err := v.fromString(*userInput)
-				if err != nil {
-					if retry > 1 {
-						fmt.Println(v.Help())
-						continue
-					}
-					return nil, err
-				}
-				inputVars[v.Name] = value
-			} else {
-				inputVars[v.Name] = v.Default
-			}
-			break
-		}
-
-	}
-	return inputVars, nil
-}
-
-func promptLoop(r *bufio.Reader, v Variable) (*string, error) {
-	for {
-		fmt.Print(v.prompt())
-		userInput, err := r.ReadString('\n')
-		fmt.Print("\n")
-		if err != nil {
-			return nil, err
-		}
-		userInput = strings.TrimSuffix(userInput, "\n")
-
-		if userInput != "" {
-			return &userInput, nil
-		}
-
-		if v.Default != nil {
-			return nil, nil
-		}
-
-	}
+	return &Spec{
+		Ignorer:   ignorer,
+		Passer:    passer,
+		Variables: variables,
+	}, nil
 }

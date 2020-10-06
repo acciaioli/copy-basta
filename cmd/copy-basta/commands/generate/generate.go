@@ -9,7 +9,6 @@ import (
 	"copy-basta/cmd/copy-basta/clients/github"
 	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
-	"copy-basta/cmd/copy-basta/ignore"
 	"copy-basta/cmd/copy-basta/load"
 	"copy-basta/cmd/copy-basta/parse"
 	"copy-basta/cmd/copy-basta/specification"
@@ -110,14 +109,8 @@ func (cmd *Command) Run() error {
 		return err
 	}
 
-	log.L.Info("loading ignorer")
-	ignorer, err := ignore.New(common.IgnoreFile, loadedFiles)
-	if err != nil {
-		return err
-	}
-
 	log.L.Info("parsing template files")
-	files, err := parse.Parse(ignorer, loadedFiles)
+	files, err := parse.Parse(spec.Ignorer, spec.Passer, loadedFiles)
 	if err != nil {
 		return err
 	}
@@ -130,14 +123,14 @@ func (cmd *Command) Run() error {
 	var input common.InputVariables
 	if cmd.inputYAML != "" {
 		log.L.InfoWithData("loading template variables from file", log.Data{"location": cmd.inputYAML})
-		fileInput, err := spec.InputFromFile(cmd.inputYAML)
+		fileInput, err := spec.Variables.InputFromFile(cmd.inputYAML)
 		if err != nil {
 			return err
 		}
 		input = fileInput
 	} else {
 		log.L.Info("getting template variables dynamically")
-		stdinInput, err := spec.InputFromStdIn()
+		stdinInput, err := spec.Variables.InputFromStdIn()
 		if err != nil {
 			return err
 		}

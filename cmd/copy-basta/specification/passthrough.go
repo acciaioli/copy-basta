@@ -1,16 +1,10 @@
 package specification
 
-type PassThrough []string
-
-func (p PassThrough) validate() error {
-	return nil
-}
-
 type Passer struct {
 	pm *PatternMatcher
 }
 
-func NewPasser(passThrough PassThrough) (*Passer, error) {
+func NewPasser(passThrough []string) (*Passer, error) {
 	pm, err := NewPatternMatcher(passThrough)
 	if err != nil {
 		return nil, err

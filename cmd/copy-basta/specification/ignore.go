@@ -1,17 +1,11 @@
 package specification
 
-type Ignore []string
-
-func (i Ignore) validate() error {
-	return nil
-}
-
 type Ignorer struct {
 	pm *PatternMatcher
 }
 
-func NewIgnorer(ignore Ignore) (*Ignorer, error) {
-	pm, err := NewPatternMatcher(ignore)
+func NewIgnorer(patterns []string) (*Ignorer, error) {
+	pm, err := NewPatternMatcher(patterns)
 	if err != nil {
 		return nil, err
 	}
