@@ -52,6 +52,15 @@ Use "copy-basta [command] --help" for more information about a command.
 
 For Linux, Mac and Windows binary releases are [available here](https://github.com/acciaioli/copy-basta/releases).
 
+#### Linux
+```
+sudo /bin/sh -c \
+	'wget https://github.com/acciaioli/copy-basta/releases/latest/download/copy-basta.linux-amd64 -O /usr/local/bin/copy-basta \
+	&& chmod +x /usr/local/bin/copy-basta'
+```
+
+
+
 #### Source code (using `go`)
 
 ```
