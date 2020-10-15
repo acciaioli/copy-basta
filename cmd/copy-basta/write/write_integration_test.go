@@ -33,11 +33,17 @@ func Test_Integration_Write(t *testing.T) {
 			Path:     "template.go",
 			Mode:     os.ModePerm,
 			Template: true,
-			Content:  []byte("package generated\n\nconst Version = \"{{ .Version }}\"\n"),
+			Content:  []byte("package generated\n\nconst Version = \"{{ .version }}\"\n"),
+		},
+		{
+			Path:     "string.txt",
+			Mode:     os.ModePerm,
+			Template: true,
+			Content:  []byte("upper: {{ .myString | stringsToUpper }}\nlower: {{ .myString | stringsToLower }}\ntitle: {{ .myString | stringsTitle }}"),
 		},
 	}
 
-	tVars := map[string]interface{}{"Version": "v0.1.4"}
+	tVars := map[string]interface{}{"version": "v0.1.4", "myString": "my string"}
 
 	err := Write(root, files, tVars)
 	require.Nil(t, err)
@@ -53,4 +59,8 @@ func Test_Integration_Write(t *testing.T) {
 	templateGO, err := ioutil.ReadFile(filepath.Join(root, files[2].Path))
 	require.Nil(t, err)
 	require.Equal(t, templateGO, []byte("package generated\n\nconst Version = \"v0.1.4\"\n"))
+
+	templateTXT, err := ioutil.ReadFile(filepath.Join(root, files[3].Path))
+	require.Nil(t, err)
+	require.Equal(t, templateTXT, []byte("upper: MY STRING\nlower: my string\ntitle: My String"))
 }

@@ -52,7 +52,7 @@ func cleanup(destDir string) {
 
 func generateFromTemplate(rawPath string, rawContent string, input common.InputVariables) (*string, *string, error) {
 	w := strings.Builder{}
-	pathT, err := template.New("filename").Option("missingkey=error").Parse(rawPath)
+	pathT, err := newTemplate("pathTemplate").Parse(rawPath)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -63,7 +63,7 @@ func generateFromTemplate(rawPath string, rawContent string, input common.InputV
 	generatedPath := w.String()
 
 	w.Reset()
-	contentT, err := template.New("content").Option("missingkey=error").Parse(rawContent)
+	contentT, err := newTemplate("contentTemplate").Parse(rawContent)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -94,4 +94,14 @@ func writeFile(fpath string, mode os.FileMode, content []byte) error {
 		return err
 	}
 	return nil
+}
+
+func newTemplate(name string) *template.Template {
+	return template.New("t").
+		Option("missingkey=error").
+		Funcs(template.FuncMap{
+			"stringsToUpper": strings.ToUpper,
+			"stringsToLower": strings.ToLower,
+			"stringsTitle":   strings.Title,
+		})
 }
