@@ -2,7 +2,7 @@
 
 src = ./demo-template
 dest = ./generated
-input = ./basta.yaml
+input = ./input.yaml
 demoBin = demo
 
 default: clean
