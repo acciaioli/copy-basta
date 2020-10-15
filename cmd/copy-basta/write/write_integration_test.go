@@ -39,7 +39,9 @@ func Test_Integration_Write(t *testing.T) {
 			Path:     "string.txt",
 			Mode:     os.ModePerm,
 			Template: true,
-			Content:  []byte("upper: {{ .myString | stringsToUpper }}\nlower: {{ .myString | stringsToLower }}\ntitle: {{ .myString | stringsTitle }}"),
+			Content: []byte(`upper: {{ .myString | stringsToUpper }}
+lower: {{ .myString | stringsToLower }}
+title: {{ .myString | stringsTitle }}`),
 		},
 	}
 
