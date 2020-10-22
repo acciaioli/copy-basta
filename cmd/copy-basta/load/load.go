@@ -9,9 +9,9 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"copy-basta/cmd/copy-basta/clients/github"
+	"copy-basta/cmd/copy-basta/common"
 	"copy-basta/cmd/copy-basta/common/log"
 )
 
@@ -52,7 +52,7 @@ func (l *DiskLoader) Load() ([]File, error) {
 			log.L.DebugWithData("external error", log.Data{"error": err.Error()})
 			return err
 		}
-		files = append(files, File{Path: trimRootDir(fPath), Mode: info.Mode(), Reader: r})
+		files = append(files, File{Path: common.TrimRootDir(fPath), Mode: info.Mode(), Reader: r})
 
 		return nil
 	})
@@ -114,21 +114,11 @@ func (l *GithubLoader) Load() ([]File, error) {
 			return nil, err
 		}
 		files = append(files, File{
-			Path:   trimRootDir(zfile.Name),
+			Path:   common.TrimRootDir(zfile.Name),
 			Mode:   info.Mode(),
 			Reader: r,
 		})
 	}
 
 	return files, nil
-}
-
-// =========== helpers =========== //
-
-func trimRootDir(s string) string {
-	ss := strings.Split(s, "/")
-	if len(ss) == 1 {
-		return ss[0]
-	}
-	return strings.Join(ss[1:], "/")
 }

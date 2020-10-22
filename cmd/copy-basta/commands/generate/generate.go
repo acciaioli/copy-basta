@@ -104,7 +104,7 @@ func (cmd *Command) Run() error {
 	}
 
 	log.L.Info("loading specification")
-	spec, err := specification.New(cmd.specYAML, loadedFiles)
+	spec, err := specification.New(common.TrimRootDir(cmd.specFullPath()), loadedFiles)
 	if err != nil {
 		return err
 	}
