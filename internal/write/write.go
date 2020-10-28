@@ -1,7 +1,6 @@
 package write
 
 import (
-	"copy-basta/internal/common/errors"
 	"os"
 	"path"
 	"path/filepath"
@@ -20,8 +19,7 @@ type Writer interface {
 }
 
 type diskWriter struct {
-	errorBuilder errors.ErrorBuilder
-	destDir      string
+	destDir string
 }
 
 func NewDiskWriter(destDir string) Writer {
@@ -34,7 +32,7 @@ func (d diskWriter) Write(files []load.File, input common.InputVariables) error 
 	err := write(d.destDir, files, input)
 	if err != nil {
 		cleanup(d.destDir)
-		return d.errorBuilder.NewInternalError(err)
+		return err
 	}
 	return nil
 }
