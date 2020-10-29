@@ -5,10 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"copy-basta/cmd/copy-basta/commands/generate"
-	"copy-basta/cmd/copy-basta/commands/initialize"
-	"copy-basta/cmd/copy-basta/common"
-	"copy-basta/cmd/copy-basta/common/log"
+	"copy-basta/cmd/copy-basta/commands"
+	"copy-basta/internal/common/log"
 )
 
 var version = "snapshot" // build-time variable
@@ -19,10 +17,6 @@ const (
 	cmdLong  = `Basta! Stop copying.
 
 This CLI can be used to bootstrap go projects in seconds, and stop the copy paste madness`
-
-	flagLogLevel            = "log-level"
-	flagLogLevelDefault     = "info"
-	flagLogLevelDescription = "Used to set the logging level.\nAvailable options: [debug, info, warn, error, fatal]"
 )
 
 func main() {
@@ -32,63 +26,51 @@ func main() {
 	}
 }
 
-var globals = struct {
+type globals struct {
 	logLevel string
-}{}
+}
+
+func (g *globals) register(cmd *cobra.Command) {
+	const flag = "log-level"
+	cmd.PersistentFlags().StringVar(
+		&g.logLevel,
+		flag,
+		log.Error,
+		fmt.Sprintf(
+			"global logging level. one of [%s, %s, %s, %s, %s]",
+			log.Debug,
+			log.Info,
+			log.Warn,
+			log.Error,
+			log.Fatal,
+		),
+	)
+}
+
+func (g *globals) process() error {
+	lvl, err := log.ToLevel(g.logLevel)
+	if err != nil {
+		return err
+	}
+	log.L.SetLevel(lvl)
+	return nil
+}
 
 func execute() error {
 	cmd := &cobra.Command{
-		Use:     cmdUse,
-		Short:   cmdShort,
-		Long:    cmdLong,
-		Version: version,
+		Use:           cmdUse,
+		Short:         cmdShort,
+		Long:          cmdLong,
+		Version:       version,
+		SilenceErrors: true,
+		SilenceUsage:  true,
 	}
 
-	cmd.PersistentFlags().StringVar(&globals.logLevel, flagLogLevel, flagLogLevelDefault, flagLogLevelDescription)
+	globals := globals{}
+	globals.register(cmd)
 
-	cmd.AddCommand(newCobraCommand(generate.NewCommand()))
-	cmd.AddCommand(newCobraCommand(initialize.NewCommand()))
+	cmd.AddCommand(commands.InitCommand(globals.process))
+	cmd.AddCommand(commands.GenerateCommand(globals.process))
 
 	return cmd.Execute()
-}
-
-type CommandInterface interface {
-	Name() string
-	Description() string
-	Flags() []common.CommandFlag
-	Run() error
-}
-
-func newCobraCommand(cmd CommandInterface) *cobra.Command {
-	cobraCmd := &cobra.Command{
-		Use:   cmd.Name(),
-		Short: cmd.Description(),
-		RunE: func(*cobra.Command, []string) error {
-			logLevel, err := log.StringToLevel(globals.logLevel)
-			if err != nil {
-				return common.NewFlagValidationError(flagLogLevel, err.Error())
-			}
-			log.L.SetLevel(logLevel)
-			return cmd.Run()
-		},
-		SilenceErrors: true,
-		SilenceUsage:  false,
-	}
-
-	for _, flag := range cmd.Flags() {
-		cobraCmd.Flags().StringVar(
-			flag.Ref,
-			flag.Name,
-			getDefault(flag.Default),
-			flag.Usage,
-		)
-	}
-	return cobraCmd
-}
-
-func getDefault(p *string) string {
-	if p == nil {
-		return ""
-	}
-	return *p
 }

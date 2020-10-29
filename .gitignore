@@ -23,4 +23,4 @@ vendor/
 # for tmp shenanigans
 .tmp/
 generated/
-play.go
+playground/
