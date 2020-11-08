@@ -1,6 +1,6 @@
 run:
   skip-dirs:
-    - internal
+    - examples
 
   concurrency: 4
 
@@ -32,7 +32,7 @@ linters:
     - goconst              # Finds repeated strings that could be replaced by a constant
 #    - gocritic            # The most opinionated Go source code linter
     - gocyclo              # Computes and checks the cyclomatic complexity of functions
-#    - godox               # Tool for detection of FIXME, TODO and other comment keywords
+#    - godox               # Tool for detection of fix-me, to-do and other comment keywords
     - gofmt                # Gofmt checks whether code was gofmt-ed. By default this tool runs with -s option to check for code simplification
     - goimports            # Goimports does everything that gofmt does. Additionally it checks unused imports
 #    - golint               # Golint differs from gofmt. Gofmt reformats Go source code, whereas golint prints out style mistakes
