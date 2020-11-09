@@ -1,4 +1,4 @@
-.PHONY: default fix lint test install build demo-generate demo-init demo-logs
+.PHONY: default fix lint test install build playground-log example-init example-simple
 
 # --- dev --- #
 
@@ -6,7 +6,7 @@ default: fix lint test
 
 fix:
 	@ echo ">> fixing source code"
-	@ gofmt -s -l -w cmd
+	@ gofmt -s -l -w internal services cmd
 	@ go mod tidy
 	@ echo ">> done"
 
