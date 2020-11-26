@@ -114,66 +114,87 @@ func validate(params *Params) error {
 		return nil
 	}
 
-	// src
-	{
-		_, err := os.Stat(params.Src)
+	var err error
+
+	err = validateSrc(params.Src)
+	if err != nil {
+		return err
+	}
+
+	err = validateDest(params.Dest, params.Overwrite)
+	if err != nil {
+		return err
+	}
+
+	err = validateSpecYAML(params.Src, params.SpecYAML)
+	if err != nil {
+		return err
+	}
+
+	err = validateInputYAML(params.InputYAML)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateSrc(src string) error {
+	_, err := os.Stat(src)
+	if os.IsNotExist(err) {
+		return fmt.Errorf("params validation error - src directory (%s) not found", src)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateDest(dest string, overwrite bool) error {
+	stat, err := os.Stat(dest)
+	if overwrite {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("params validation error - src directory (%s) not found", params.Src)
+			return fmt.Errorf("params validation error - can't override dest directory (%s) it does not exist", dest)
 		}
 		if err != nil {
 			return err
 		}
-
-	}
-
-	// dest
-	{
-		stat, err := os.Stat(params.Dest)
-		if params.Overwrite {
-			if os.IsNotExist(err) {
-				return fmt.Errorf("params validation error - can't override dest directory (%s) it does not exist", params.Dest)
-			}
-			if err != nil {
-				return err
-			}
-		} else {
-			if os.IsNotExist(err) {
-			} else if err != nil {
-				return err
-			} else if stat.IsDir() {
-				return fmt.Errorf("params validation error - create dest directory (%s) it already exists", params.Dest)
-			}
+	} else {
+		if os.IsNotExist(err) {
+		} else if err != nil {
+			return err
+		} else if stat.IsDir() {
+			return fmt.Errorf("params validation error - create dest directory (%s) it already exists", dest)
 		}
 	}
+	return nil
+}
 
-	// specYAML
-	{
-		if params.SpecYAML == "" {
-			return fmt.Errorf("params validation error - specYAML can't be empty")
-		}
-		specYAMLFullPath := filepath.Join(params.Src, params.SpecYAML)
-		fInfo, err := os.Stat(specYAMLFullPath)
+func validateSpecYAML(src string, specYAML string) error {
+	if specYAML == "" {
+		return fmt.Errorf("params validation error - specYAML can't be empty")
+	}
+	specYAMLFullPath := filepath.Join(src, specYAML)
+	fInfo, err := os.Stat(specYAMLFullPath)
+	if err != nil {
+		return fmt.Errorf("params validation error - specYAML file (%s) not found", specYAMLFullPath)
+	}
+	if fInfo.IsDir() {
+		return fmt.Errorf("params validation error - specYAML file (%s) is not a file", specYAMLFullPath)
+	}
+	return nil
+}
+
+func validateInputYAML(inputYAML string) error {
+	if inputYAML != "" {
+		fInfo, err := os.Stat(inputYAML)
 		if err != nil {
-			return fmt.Errorf("params validation error - specYAML file (%s) not found", specYAMLFullPath)
+			return fmt.Errorf("params validation error - inputYAML file (%s) not found", inputYAML)
 		}
 		if fInfo.IsDir() {
-			return fmt.Errorf("params validation error - specYAML file (%s) is not a file", specYAMLFullPath)
+			return fmt.Errorf("params validation error - inputYAML file (%s) is not a file", inputYAML)
 		}
 	}
-
-	// inputYAML
-	{
-		if params.InputYAML != "" {
-			fInfo, err := os.Stat(params.InputYAML)
-			if err != nil {
-				return fmt.Errorf("params validation error - inputYAML file (%s) not found", params.InputYAML)
-			}
-			if fInfo.IsDir() {
-				return fmt.Errorf("params validation error - inputYAML file (%s) is not a file", params.InputYAML)
-			}
-		}
-	}
-
 	return nil
 }
 
