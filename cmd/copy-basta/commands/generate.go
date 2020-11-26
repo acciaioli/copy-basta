@@ -9,6 +9,7 @@ import (
 )
 
 func GenerateCommand(globals func() error) *cobra.Command {
+
 	const (
 		commandUse         = "generate"
 		commandDescription = "generates new project based on the template and provided parameters"
@@ -25,12 +26,16 @@ func GenerateCommand(globals func() error) *cobra.Command {
 
 		flagInput            = "input"
 		flagDescriptionInput = "Path to the YAML file with the variables to use in the templates"
+
+		flagOverwrite            = "overwrite"
+		flagDescriptionOverwrite = "Allow overriding files in an existing destination directory"
 	)
 
 	var src string
 	var dest string
 	var specYAML string
 	var inputYAML string
+	var overwrite bool
 
 	cmd := &cobra.Command{
 		Use:   commandUse,
@@ -45,6 +50,7 @@ func GenerateCommand(globals func() error) *cobra.Command {
 				Dest:      dest,
 				SpecYAML:  specYAML,
 				InputYAML: inputYAML,
+				Overwrite: overwrite,
 			})
 		},
 	}
@@ -75,6 +81,13 @@ func GenerateCommand(globals func() error) *cobra.Command {
 		flagInput,
 		"",
 		flagDescriptionInput,
+	)
+
+	cmd.Flags().BoolVar(
+		&overwrite,
+		flagOverwrite,
+		false,
+		flagDescriptionOverwrite,
 	)
 
 	return cmd
