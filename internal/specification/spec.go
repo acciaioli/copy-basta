@@ -17,7 +17,7 @@ type Spec struct {
 	Variables Variables
 }
 
-func New(specFileName string, files []crawl.File) (*Spec, error) {
+func New(specFileName string, files []crawl.File, overwrite bool) (*Spec, error) {
 	var specFile *crawl.File
 	for _, f := range files {
 		if f.Path == specFileName {
@@ -29,10 +29,10 @@ func New(specFileName string, files []crawl.File) (*Spec, error) {
 		return nil, fmt.Errorf("specification: failed to find spec file (%s)", specFileName)
 	}
 
-	return newFromReader(specFile.Reader)
+	return newFromReader(specFile.Reader, overwrite)
 }
 
-func newFromReader(r io.Reader) (*Spec, error) {
+func newFromReader(r io.Reader, overwrite bool) (*Spec, error) {
 	data := SpecData{}
 	err := yaml.NewDecoder(r).Decode(&data)
 	if err != nil {
@@ -40,7 +40,13 @@ func newFromReader(r io.Reader) (*Spec, error) {
 		return nil, errors.New("specification yaml file error: failed to decode yaml")
 	}
 
-	ignorer, err := NewIgnorer(data.Ignore)
+	var ignoredPatterns []string
+	ignoredPatterns = append(ignoredPatterns, data.Ignore...)
+	if overwrite {
+		ignoredPatterns = append(ignoredPatterns, data.OnOverwrite.Exclude...)
+	}
+
+	ignorer, err := NewIgnorer(ignoredPatterns)
 	if err != nil {
 		return nil, fmt.Errorf("ignorer error: %s", err.Error())
 	}

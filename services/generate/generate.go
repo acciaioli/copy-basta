@@ -21,6 +21,7 @@ type Params struct {
 	Dest      string
 	SpecYAML  string
 	InputYAML string
+	Overwrite bool
 }
 
 func Generate(params *Params) error {
@@ -51,7 +52,7 @@ func Generate(params *Params) error {
 
 	log.L.Info("loading specification...")
 	specLoadedPath := common.TrimRootDir(filepath.Join(params.Src, params.SpecYAML))
-	spec, err := specification.New(specLoadedPath, crawledFiles)
+	spec, err := specification.New(specLoadedPath, crawledFiles, params.Overwrite)
 	if err != nil {
 		return err
 	}
@@ -123,6 +124,26 @@ func validate(params *Params) error {
 			return err
 		}
 
+	}
+
+	// dest
+	{
+		stat, err := os.Stat(params.Dest)
+		if params.Overwrite {
+			if os.IsNotExist(err) {
+				return fmt.Errorf("params validation error - can't override dest directory (%s) it does not exist", params.Dest)
+			}
+			if err != nil {
+				return err
+			}
+		} else {
+			if os.IsNotExist(err) {
+			} else if err != nil {
+				return err
+			} else if stat.IsDir() {
+				return fmt.Errorf("params validation error - create dest directory (%s) it already exists", params.Dest)
+			}
+		}
 	}
 
 	// specYAML
