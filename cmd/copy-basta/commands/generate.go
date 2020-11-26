@@ -8,24 +8,24 @@ import (
 	"copy-basta/internal/common"
 )
 
-func GenerateCommand(globals func() error) *cobra.Command {
+func Generate(globals func() error) *cobra.Command {
 
 	const (
 		commandUse         = "generate"
-		commandDescription = "generates new project based on the template and provided parameters"
+		commandDescription = "generates a new codebase based on the template and on the provided variables"
 
 		flagSrc            = "src"
-		flagDescriptionSrc = "Generated Project root directory"
+		flagDescriptionSrc = "root directory of the template codebase"
 
 		flagDest            = "dest"
-		flagDescriptionDest = "Specification YAML file, relative to the template root directory"
+		flagDescriptionDest = "to be root directory of the generated codebase"
 
 		flagSpec            = "spec"
 		flagDefaultSpec     = common.SpecFile
-		flagDescriptionSpec = "Path to the YAML containing the template specification"
+		flagDescriptionSpec = "path (relative to src) to the YAML containing the template specification"
 
 		flagInput            = "input"
-		flagDescriptionInput = "Path to the YAML file with the variables to use in the templates"
+		flagDescriptionInput = "path to the YAML file with the variables to use in the templates"
 
 		flagOverwrite            = "overwrite"
 		flagDescriptionOverwrite = "Allow overriding files in an existing destination directory"
