@@ -69,8 +69,8 @@ func execute() error {
 	globals := globals{}
 	globals.register(cmd)
 
-	cmd.AddCommand(commands.InitCommand(globals.process))
-	cmd.AddCommand(commands.GenerateCommand(globals.process))
+	cmd.AddCommand(commands.Init(globals.process))
+	cmd.AddCommand(commands.Generate(globals.process))
 
 	return cmd.Execute()
 }

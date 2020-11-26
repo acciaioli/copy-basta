@@ -6,21 +6,13 @@ import (
 	"copy-basta/services/bootstrap"
 )
 
-const (
-	commandID          = "init"
-	commandDescription = "bootstraps a new copy-basta template project"
-
-	flagName      = "name"
-	flagUsageName = "New Project root directory"
-)
-
-func InitCommand(globals func() error) *cobra.Command {
+func Init(globals func() error) *cobra.Command {
 	const (
 		commandUse         = "init"
-		commandDescription = "bootstraps a new copy-basta template project"
+		commandDescription = "bootstraps a new copy-basta template codebase"
 
 		flagName            = "name"
-		flagDescriptionName = "New Project root directory"
+		flagDescriptionName = "name and root directory of the new template codebase"
 	)
 
 	var name string
